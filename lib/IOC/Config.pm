@@ -3,7 +3,7 @@ package IOC::Config;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Config::ApacheFormat;
 
@@ -57,7 +57,7 @@ sub read {
             my $c = IOC::Container->new( $container->[1] );
             $r->registerContainer( $c );
 
-            $self->_read( $c, $registry, $container );
+            $self->_read( $r, $c, $registry, $container, "/$container->[1]" );
         }
     }
 
@@ -66,7 +66,7 @@ sub read {
 
 sub _read {
     my $self = shift;
-    my ($c, $parent, $container) = @_;
+    my ($r, $c, $parent, $container, $curr_path) = @_;
 
     $container = $parent->block( $container );
 
@@ -85,7 +85,7 @@ sub _read {
         my $c2 = IOC::Container->new( $child->[1] );
         $c->addSubContainer( $c2 );
 
-        $self->_read( $c2, $container, $child );
+        $self->_read( $r, $c2, $container, $child, "${curr_path}/$child->[1]" );
     }
 
     foreach my $service ($container->get( 'Service' )) {
@@ -129,6 +129,11 @@ sub _read {
         $c->register(
             $service_map->{subroutine}->( $name, $service ),
         );
+
+        foreach my $alias ( $service->get( 'Alias' ) )
+        {
+            $r->aliasService( "$curr_path/$name", $alias );
+        }
     }
 }
 
@@ -153,7 +158,7 @@ sub addServiceType {
     ((!exists $options{optional}) || (ref $options{optional} eq 'ARRAY'))
         || throw IOC::InsufficientArguments;
     $options{optional} ||= [];
-    @{$options{optional}} = map { lc } @{$options{optional}}, 'type';
+    @{$options{optional}} = map { lc } @{$options{optional}}, 'type', 'alias';
 
     ((exists $options{subroutine}) && (ref $options{subroutine} eq 'CODE'))
         || throw IOC::InsufficientArguments;
@@ -375,11 +380,16 @@ be unique among all siblings of this directive.
 
 =over 4
 
-=item * Literal
+=item Literal (optional)
 
 This is the definition of some literal value at some point in the IOC
 hierarchy. This option takes two values - the first is the name of the
 literal and the second is its value.
+
+=item Alias (optional)
+
+This provides an alternate name instead of the name provided for in the block
+definition.
 
 =back
 
@@ -421,6 +431,11 @@ basic required and optional parameters.
 
 This specifies which type of service this block is building. If this parameter
 is missing, a IOC::InsufficientArguments exception will be thrown.
+
+=item Alias (optional)
+
+This provides an alternate name instead of the name provided for in the block
+definition.
 
 =item Singleton (optional)
 
