@@ -1,7 +1,6 @@
 Changes
 Makefile.PL
 MANIFEST
-MANIFEST.SKIP
 README
 lib/IOC.pm
 lib/IOC/Container.pm
