@@ -16,9 +16,7 @@ can_ok("IOC::Config::XML", 'new');
     my $conf = IOC::Config::XML->new();
     isa_ok($conf, 'IOC::Config::XML');
     
-    can_ok($conf, 'read');
-    can_ok($conf, 'getConfig');    
-
+    can_ok($conf, 'read');  
 }
 
 {
@@ -208,3 +206,50 @@ can_ok("IOC::Config::XML", 'new');
     
     $reg->DESTROY();
 }
+
+{
+    my $sample_config = q|
+    <Registry>
+        <Container name='test'>
+            <Service name='test_service' prototype='false'>
+            <CDATA>
+                return bless({}, 'My::Test');
+            </CDATA>
+            </Service>
+            <Service name='test_service2' prototype='true'>
+            <CDATA>
+                return bless({}, 'My::Test2');
+            </CDATA>
+            </Service>
+        </Container>      
+    </Registry>
+    |;
+
+    my $conf = IOC::Config::XML->new();
+    isa_ok($conf, 'IOC::Config::XML');
+    
+    lives_ok {
+        $conf->read($sample_config);
+    } '... we read the conf okay';
+
+    my $reg = IOC::Registry->new();
+    isa_ok($reg, 'IOC::Registry');
+
+    my $c = $reg->getRegisteredContainer('test');
+    isa_ok($c, 'IOC::Container');
+    
+    is($c->name(), 'test', '... got the right name');
+    
+    my $test_service = $c->get('test_service');
+    isa_ok($test_service, 'My::Test');
+    
+    is($test_service, $c->get('test_service'), '... and if I get it again, it is the same one');
+
+    my $test_service2 = $c->get('test_service2');
+    isa_ok($test_service2, 'My::Test2');
+    
+    isnt($test_service2, $c->get('test_service2'), '... and if I get it again, it is not the same one');
+    
+    $reg->DESTROY();
+}
+
