@@ -10,6 +10,6 @@ WriteMakefile(
         'Class::Throwable'       => 0.04,
         'Class::Interfaces'      => 0.01,
         'Class::StrongSingleton' => 0.01,
-        'Config::ApacheFormat'   => 1.2
+        'XML::Simple'            => 0
     }
 );

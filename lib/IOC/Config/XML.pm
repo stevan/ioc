@@ -30,7 +30,7 @@ sub new {
     my ($_class) = @_;
     my $class = ref($_class) || $_class;
     my $config = {
-        _config => undef
+        _config => {}
     };
     bless($config, $class);
     return $config;
@@ -38,6 +38,8 @@ sub new {
 
 sub read {
     my ($self, $source) = @_;
+    (defined($source) && $source) 
+        || throw IOC::InsufficientArguments "You must provide something to read";
     $self->{_config} = XML::Simple::XMLin($source => (
                 keyattr    => { Service => '+name' }, 
                 forcearray => [ 'Service', 'Container', 'Parameter', 'Setter' ]
@@ -45,8 +47,6 @@ sub read {
     my $reg = IOC::Registry->new();
     $self->_parse($reg);
 }
-
-sub getConfig { (shift)->{_config} }
 
 sub _parse {
     my ($self, $reg) = @_;
@@ -63,7 +63,10 @@ sub _parse {
 }
 
 sub _parseContainer {
-    my ($self, $conf) = @_;    
+    my ($self, $conf) = @_;  
+    
+    (exists $conf->{name}) 
+        || throw IOC::ConfigurationError "Container must have 'name' value";      
     
     my $container = IOC::Container->new($conf->{name});      
     
@@ -79,7 +82,7 @@ sub _parseContainer {
         $container->register($service);
     }   
     
-    # if we have sub-containers
+    # if we have sub-containers, then recurse
     if (exists $conf->{Container}) {
         foreach my $container_conf (@{$conf->{Container}}) {
             my $sub_container = $self->_parseContainer($container_conf);
@@ -93,11 +96,25 @@ sub _parseContainer {
 sub _parseService {
     my ($self, $conf) = @_;    
     
+#     print Dumper $conf; 
+
+    (exists $conf->{name}) 
+        || throw IOC::ConfigurationError "Service must have 'name' value";
+       
     unless (exists $conf->{type}) {
+        my $service_class;
+        if (exists $conf->{prototype} && $conf->{prototype} eq 'true') {
+            $service_class = 'IOC::Service::Prototype';
+        }
+        else {
+            $service_class = 'IOC::Service';
+        }         
+        (exists $conf->{CDATA}) 
+            || throw IOC::ConfigurationError "IOC::Service must have a CDATA section";
         my $sub = eval "sub {" . $conf->{CDATA} . "}";
         (!$@ || ref($sub) eq 'CODE') 
             || throw IOC::OperationFailed "Could not compile sub for (" . $conf->{name} . ")"=> $@;
-        return IOC::Service->new($conf->{name} => $sub);
+        return $service_class->new($conf->{name} => $sub);
     }
     else {
         my $type = $conf->{type};
@@ -110,6 +127,8 @@ sub _parseService {
 
 sub _parseLiteralService {
     my ($self, $conf) = @_;  
+    (exists $conf->{CDATA} || exists $conf->{content}) 
+        || throw IOC::ConfigurationError "IOC::Service::Literal must have either a content value or CDATA";    
     return IOC::Service::Literal->new($conf->{name} => (
         (exists $conf->{CDATA}) ? $conf->{CDATA} : $conf->{content}
     ));    
@@ -117,9 +136,16 @@ sub _parseLiteralService {
 
 sub _parseConstructorInjectionService {
     my ($self, $conf) = @_;  
+    my $service_class;
+    if (exists $conf->{prototype} && $conf->{prototype} eq 'true') {
+        $service_class = 'IOC::Service::Prototype::ConstructorInjection';
+    }
+    else {
+        $service_class = 'IOC::Service::ConstructorInjection';
+    }
     my @parameters = map {
         if ($_->{type} eq 'component') {
-            IOC::Service::ConstructorInjection->ComponentParameter($_->{content})
+            $service_class->ComponentParameter($_->{content})
         }
         elsif ($_->{type} eq 'perl') {
             my $perl = (exists $_->{CDATA}) ? $_->{CDATA} : $_->{content};
@@ -131,7 +157,12 @@ sub _parseConstructorInjectionService {
             (exists $_->{CDATA}) ? $_->{CDATA} : $_->{content}
         }
     } @{$conf->{Parameter}};
-    return IOC::Service::ConstructorInjection->new($conf->{name} => (
+    (exists $conf->{Class})
+        || throw IOC::ConfigurationError "$service_class must have a <Class> tag";
+    my $class = $conf->{Class};
+    (exists $class->{name} && exists $class->{constructor}) 
+        || throw IOC::ConfigurationError "$service_class <Class> tag must have a 'name' and a 'constructor' value";
+    return $service_class->new($conf->{name} => (
         $conf->{Class}->{name}, $conf->{Class}->{constructor},
         \@parameters
     ));    
@@ -139,6 +170,13 @@ sub _parseConstructorInjectionService {
 
 sub _parseSetterInjectionService {
     my ($self, $conf) = @_;
+    my $service_class;
+    if (exists $conf->{prototype} && $conf->{prototype} eq 'true') {
+        $service_class = 'IOC::Service::Prototype::SetterInjection';
+    }
+    else {
+        $service_class = 'IOC::Service::SetterInjection';
+    }    
     my @setters = map { 
         { $_->{name} => $_->{content} }
     } @{$conf->{Setter}};
@@ -146,7 +184,7 @@ sub _parseSetterInjectionService {
 #     print Dumper $conf;
 #     print Dumper \@setters;    
     
-    return IOC::Service::SetterInjection->new($conf->{name} => (
+    return $service_class->new($conf->{name} => (
         $conf->{Class}->{name}, $conf->{Class}->{constructor}, \@setters
     ));    
 }
@@ -173,7 +211,7 @@ IOC::Config::XML - An XML Config reader for IOC
                 <Service name='dsn'      type='Literal'>dbi:Mock:</Service>            
                 <Service name='username' type='Literal'>user</Service>            
                 <Service name='password' type='Literal'>****</Service>                                    
-                <Service name='connection' type='ConstructorInjection'>
+                <Service name='connection' type='ConstructorInjection' prototype='true'>
                     <Class name='DBI' constructor='connect' />
                     <Parameter type='component'>dsn</Parameter>                
                     <Parameter type='component'>username</Parameter>
@@ -209,21 +247,15 @@ IOC::Config::XML - An XML Config reader for IOC
 
 =item B<read ($source)>
 
-=item B<getConfig>
-
 =back
 
 =head1 TO DO
 
 =over 4
 
-=item Parse arbitrary perl structures with ConstructorInjection arguments
-
 =item Handle Includes
 
 =item Handle Aliasing
-
-=item Handle any prototype stuff
 
 =item better error checking and handling
 

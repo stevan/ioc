@@ -1,16 +1,14 @@
 Revision history for Perl extension IOC.
 
 0.24
-    + Added IOC::Config
-        - thanks to Rob Kinyon for writing this
-        - added Config::ApacheFormat as a dependency
-            - added this to the MakeFile.PL
-            - added tests for this
-            - added documenation for this        
+    + Added IOC::Config::XML     
+        - added tests and documentation for this
+        - added XML::Simple as a dependency
 
     * IOC::Exceptions
-        - added IOC::InvalidArgument and 
-          IOC::InitializationError for IOC::Config
+        - added some expecptions for IOC::Config::XML
+            ~ IOC::ConfigurationError
+            
 
 0.23 Fri Jan 14 2005
     * IOC::Registry

@@ -20,8 +20,7 @@ use Class::Throwable qw(
         IOC::ConstructorNotFound
         IOC::MethodNotFound
         IOC::OperationFailed
-        IOC::InvalidArgument
-        IOC::InitializationError
+        IOC::ConfigurationError
         );
 
 $Class::Throwable::DEFAULT_VERBOSITY = 2;
