@@ -1,6 +1,6 @@
 Revision history for Perl extension IOC.
 
-0.24_1
+0.24
     + Added IOC::Config
         - thanks to Rob Kinyon for writing this
         - added Config::ApacheFormat as a dependency

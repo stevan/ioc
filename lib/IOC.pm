@@ -4,7 +4,7 @@ package IOC;
 use strict;
 use warnings;
 
-our $VERSION = '0.24_1';
+our $VERSION = '0.24';
 
 use IOC::Exceptions;
 
