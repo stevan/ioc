@@ -51,7 +51,7 @@ sub getConfig { (shift)->{_config} }
 sub _parse {
     my ($self, $reg) = @_;
     my $conf = $self->{_config};
-    (!exists ${$conf}{Service}) 
+    (!exists $conf->{Service}) 
         || throw IOC::InitializationError "You cannot have a service in a registry";
         
 #     print Dumper $conf->{Container};        
@@ -80,7 +80,7 @@ sub _parseContainer {
     }   
     
     # if we have sub-containers
-    if (exists ${$conf}{Container}) {
+    if (exists $conf->{Container}) {
         foreach my $container_conf (@{$conf->{Container}}) {
             my $sub_container = $self->_parseContainer($container_conf);
             $container->addSubContainer($sub_container);      
@@ -93,7 +93,7 @@ sub _parseContainer {
 sub _parseService {
     my ($self, $conf) = @_;    
     
-    unless (exists ${$conf}{type}) {
+    unless (exists $conf->{type}) {
         my $sub = eval "sub {" . $conf->{CDATA} . "}";
         (!$@ || ref($sub) eq 'CODE') 
             || throw IOC::OperationFailed "Could not compile sub for (" . $conf->{name} . ")"=> $@;
@@ -111,7 +111,7 @@ sub _parseService {
 sub _parseLiteralService {
     my ($self, $conf) = @_;  
     return IOC::Service::Literal->new($conf->{name} => (
-        (exists ${$conf}{CDATA}) ? $conf->{CDATA} : $conf->{content}
+        (exists $conf->{CDATA}) ? $conf->{CDATA} : $conf->{content}
     ));    
 }
 
@@ -122,13 +122,13 @@ sub _parseConstructorInjectionService {
             IOC::Service::ConstructorInjection->ComponentParameter($_->{content})
         }
         elsif ($_->{type} eq 'perl') {
-            my $perl = (exists ${$_}{CDATA}) ? $_->{CDATA} : $_->{content};
+            my $perl = (exists $_->{CDATA}) ? $_->{CDATA} : $_->{content};
             my $value = eval $perl;
             throw IOC::OperationFailed "Could not compile '" . $_->{content}. "'", $@ if $@;
             $value;
         }
         else {
-            (exists ${$_}{CDATA}) ? $_->{CDATA} : $_->{content}
+            (exists $_->{CDATA}) ? $_->{CDATA} : $_->{content}
         }
     } @{$conf->{Parameter}};
     return IOC::Service::ConstructorInjection->new($conf->{name} => (
