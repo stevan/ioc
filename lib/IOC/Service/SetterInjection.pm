@@ -4,7 +4,7 @@ package IOC::Service::SetterInjection;
 use strict;
 use warnings;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use IOC::Exceptions;
 
@@ -38,7 +38,12 @@ sub _init {
             # not, then require it            
             eval { 
                 no strict 'refs';
-                %{"${component_class}::"};
+                # check for the symbol table itself ...
+                (keys %{"${component_class}::"} || 
+                    # and then to be sure, lets look for  
+                    # either the VERSION or the ISA variables
+                    (defined ${"${component_class}::VERSION"} 
+                        || defined @{"${component_class}::ISA"})) ? 1 : 0;
             } || eval "use $component_class";
             # throw our exception if the class fails to load
             throw IOC::ClassLoadingError "The class '$component_class' could not be loaded" => $@ if $@;

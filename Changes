@@ -1,6 +1,11 @@
 Revision history for Perl extension IOC.
 
 0.24
+    * IOC::Service::ConstructorInjection
+    * IOC::Service::SetterInjection  
+        - improved the handling for loading 
+          classes automatically
+        
     + Added IOC::Config::XML     
         - added tests and documentation for this
         - added XML::Simple as a dependency
