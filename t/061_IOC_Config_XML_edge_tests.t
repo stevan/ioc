@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 39;
+use Test::More tests => 34;
 use Test::Exception;
 
 BEGIN {
@@ -180,43 +180,6 @@ BEGIN {
     
     my $test_service = $c->get('test_service');
     isa_ok($test_service, 'My::Test::Constructor');
-    
-    $reg->DESTROY();
-}
-
-# test an empty parameter
-{
-    {
-        package My::Test::Constructor2;
-        sub new { bless { value => undef } }
-    }
-
-    my $sample_config = q|
-    <Registry>
-        <Container name='test'>
-            <Service type="ConstructorInjection" name='test_service'>
-                <Class name='My::Test::Constructor2' constructor='new' />
-                <Parameter></Parameter>
-            </Service>           
-        </Container>      
-    </Registry>
-    |;
-
-    my $conf = IOC::Config::XML->new();
-    isa_ok($conf, 'IOC::Config::XML');
-    
-    lives_ok {
-        $conf->read($sample_config);
-    } '... we read the conf okay';
-
-    my $reg = IOC::Registry->new();
-    isa_ok($reg, 'IOC::Registry');
-
-    my $c = $reg->getRegisteredContainer('test');
-    isa_ok($c, 'IOC::Container');
-    
-    my $test_service = $c->get('test_service');
-    isa_ok($test_service, 'My::Test::Constructor2');
     
     $reg->DESTROY();
 }

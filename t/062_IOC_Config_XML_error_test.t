@@ -40,13 +40,19 @@ BEGIN {
         $conf->read('<Registry><Service name="test"></Service></Registry>');        
     } 'IOC::ConfigurationError', '... got the error we expected';  
     
+    IOC::Registry->new()->DESTROY();    
+    
 	throws_ok {
         $conf->read('<Registry><Container type="ConstructorInjection"></Container></Registry>');        
     } 'IOC::ConfigurationError', '... got the error we expected';   
     
+    IOC::Registry->new()->DESTROY();    
+
 	throws_ok {
         $conf->read('<Registry><Container name="test"><Service type="Literal">25</Service></Container></Registry>');        
     } 'IOC::ConfigurationError', '... got the error we expected';   
+    
+    IOC::Registry->new()->DESTROY();    
     
 	throws_ok {
         $conf->read(q{
@@ -58,6 +64,8 @@ BEGIN {
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';    
     
+    IOC::Registry->new()->DESTROY();    
+    
 	throws_ok {
         $conf->read(q{
             <Registry>
@@ -66,7 +74,9 @@ BEGIN {
                 </Container>
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';      
-                                                                                                             
+                                        
+    IOC::Registry->new()->DESTROY();                                                                                                                 
+                                                                                                                                                                                                                                                       
 	throws_ok {
         $conf->read(q{
             <Registry>
@@ -74,7 +84,9 @@ BEGIN {
                     <Service name="test"><![CDATA[1 + ;s]]></Service>         
                 </Container>
             </Registry>});        
-    } 'IOC::OperationFailed', '... got the error we expected';                                                                                                                                                                                                                                                                                                                                
+    } 'IOC::OperationFailed', '... got the error we expected';         
+    
+    IOC::Registry->new()->DESTROY();        
     
 	throws_ok {
         $conf->read(q{
@@ -85,6 +97,8 @@ BEGIN {
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';   
     
+    IOC::Registry->new()->DESTROY();        
+    
 	throws_ok {
         $conf->read(q{
             <Registry>
@@ -94,6 +108,8 @@ BEGIN {
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';  
     
+    IOC::Registry->new()->DESTROY();        
+    
 	throws_ok {
         $conf->read(q{
             <Registry>
@@ -101,7 +117,9 @@ BEGIN {
                     <Service name="test" type="Literal"><CDATA type="nuttin"></CDATA></Service>         
                 </Container>
             </Registry>});        
-    } 'IOC::ConfigurationError', '... got the error we expected';                          
+    } 'IOC::ConfigurationError', '... got the error we expected';     
+    
+    IOC::Registry->new()->DESTROY();        
     
 	throws_ok {
         $conf->read(q{
@@ -115,6 +133,8 @@ BEGIN {
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';   
     
+    IOC::Registry->new()->DESTROY();        
+    
 	throws_ok {
         $conf->read(q{
             <Registry>
@@ -126,6 +146,8 @@ BEGIN {
                 </Container>
             </Registry>});        
     } 'IOC::OperationFailed', '... got the error we expected';              
+    
+    IOC::Registry->new()->DESTROY();        
     
 	throws_ok {
         $conf->read(q{
@@ -139,6 +161,8 @@ BEGIN {
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';     
     
+    IOC::Registry->new()->DESTROY();        
+    
 	throws_ok {
         $conf->read(q{
             <Registry>
@@ -148,6 +172,8 @@ BEGIN {
                 </Container>
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';          
+    
+    IOC::Registry->new()->DESTROY();        
     
 	throws_ok {
         $conf->read(q{
@@ -159,6 +185,8 @@ BEGIN {
                 </Container>
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';          
+    
+    IOC::Registry->new()->DESTROY();        
     
 	throws_ok {
         $conf->read(q{
@@ -171,6 +199,8 @@ BEGIN {
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected'; 
     
+    IOC::Registry->new()->DESTROY();        
+    
 	throws_ok {
         $conf->read(q{
             <Registry>
@@ -180,6 +210,8 @@ BEGIN {
                 </Container>
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';          
+    
+    IOC::Registry->new()->DESTROY();        
     
 	throws_ok {
         $conf->read(q{
@@ -192,6 +224,8 @@ BEGIN {
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';          
     
+    IOC::Registry->new()->DESTROY();        
+    
 	throws_ok {
         $conf->read(q{
             <Registry>
@@ -203,4 +237,5 @@ BEGIN {
             </Registry>});        
     } 'IOC::ConfigurationError', '... got the error we expected';                           
     
+    IOC::Registry->new()->DESTROY();        
 }

@@ -20,9 +20,6 @@ use IOC::Service;
 use IOC::Service::ConstructorInjection;
 use IOC::Service::SetterInjection;
 
-#### NOTE:
-#### does not handle prototypes yet !!!
-#### FIXME
 use IOC::Service::Prototype;
 use IOC::Service::Prototype::ConstructorInjection;
 use IOC::Service::Prototype::SetterInjection;
@@ -51,28 +48,36 @@ sub _getValue {
 
 sub _createService {
     my ($self) = @_;
-    my $service_desc = $self->{current_service};
+    my $service_desc = $self->{current_service};    
+    my $service_class = 'IOC::Service';    
+    $service_class .= '::Prototype' if $service_desc->{prototype} && lc($service_desc->{prototype}) ne 'false';    
     if (! defined $service_desc->{type}) {
         # we have a plain Service
+        ($service_desc->{data})
+            || throw IOC::ConfigurationError "No sub in Service";
         my $sub = eval "sub { " . $service_desc->{data} . " }";
-        throw IOC::ConfigurationError "could not compile : " . $service_desc->{data}, $@ if $@;
+        throw IOC::OperationFailed "could not compile : " . $service_desc->{data}, $@ if $@;
         $self->{current}->register(
-            IOC::Service->new(
+            $service_class->new(
                 $service_desc->{name} => $sub
             )
         );
     }
     elsif ($service_desc->{type} eq 'Literal') {          
+        (exists $service_desc->{data}) 
+            || throw IOC::ConfigurationError "Cant make a Literal without a value";
         $self->{current}->register(
             IOC::Service::Literal->new($service_desc->{name} => $service_desc->{data})
         );               
     } 
     elsif ($service_desc->{type} eq 'ConstructorInjection') {  
-        (exists $service_desc->{class}) 
-            || throw IOC::ConfigurationError "Cant make a ConstructorInjection without a class";
+        (exists $service_desc->{class} && 
+            ($service_desc->{class}->{name} && $service_desc->{class}->{constructor})) 
+                || throw IOC::ConfigurationError "Cant make a ConstructorInjection without a class";
         my @parameters;
+        use Data::Dumper;
         @parameters = map {
-            if ($_->{type}) {
+            if ($_->{type}) {           
                 if ($_->{type} eq 'component') {
                     IOC::Service::ConstructorInjection->ComponentParameter($_->{data})
                 }
@@ -87,12 +92,15 @@ sub _createService {
                 }
             }
             else {
+                (defined $_->{data})
+                    || throw IOC::ConfigurationError "No data";             
                 $_->{data}
             }
         } @{$service_desc->{parameters}}
             if exists $service_desc->{parameters};
+        $service_class .= '::ConstructorInjection';    
         $self->{current}->register(
-            IOC::Service::ConstructorInjection->new($service_desc->{name} => (
+            $service_class->new($service_desc->{name} => (
                 $service_desc->{class}->{name},
                 $service_desc->{class}->{constructor},
                 \@parameters
@@ -100,21 +108,26 @@ sub _createService {
         );               
     }         
     elsif ($service_desc->{type} eq 'SetterInjection') {  
-        (exists $service_desc->{class}) 
-            || throw IOC::ConfigurationError "Cant make a ConstructorInjection without a class";                       
+        (exists $service_desc->{class} &&
+            ($service_desc->{class}->{name} && $service_desc->{class}->{constructor}))         
+                || throw IOC::ConfigurationError "Cant make a ConstructorInjection without a class";                       
         my @setters;
         @setters = map {
-            $_->{name} => $_->{data}
+            { $_->{name} => $_->{data} }
         } @{$service_desc->{setters}} 
             if exists $service_desc->{setters};            
+        $service_class .= '::SetterInjection';    
         $self->{current}->register(
-            IOC::Service::SetterInjection->new($service_desc->{name} => (
+            $service_class->new($service_desc->{name} => (
                 $service_desc->{class}->{name},
                 $service_desc->{class}->{constructor},
                 \@setters
             ))
         );               
-    }         
+    }   
+    else {
+        throw IOC::ConfigurationError "Unrecognized type : " . $service_desc->{type};
+    }      
     $self->{current_service} = undef;     
 }
 
@@ -129,6 +142,8 @@ sub start_element {
     }
     elsif (defined($self->{registry})) {
         if ($type eq 'container') {
+            ($self->_getValue($el, 'name'))
+                || throw IOC::ConfigurationError "Container must have name";
             my $c;
             if ($self->{current}->isa('IOC::Registry')) {
                 $c = IOC::Container->new($self->_getName($el));
@@ -146,12 +161,12 @@ sub start_element {
         elsif ($type eq 'service') {
             (!$self->{current}->isa('IOC::Registry')) ||
                 throw IOC::ConfigurationError "Services must be within containers";  
-            if ($self->{current_service}) {
-                print Dumper $self->{current_service};
-            }
+            ($self->_getValue($el, 'name'))
+                || throw IOC::ConfigurationError "Service must have name";                
             $self->{current_service} = {
-                name => $self->_getName($el),
-                type => $self->_getValue($el, 'type'),
+                name      => $self->_getName($el),
+                type      => $self->_getValue($el, 'type'),
+                prototype => $self->_getValue($el, 'prototype'),                
             };                
         }
         elsif ($type eq 'class') {
@@ -194,10 +209,19 @@ sub start_element {
 
 sub end_element {
     my ($self, $el) = @_;	
-    if (lc($el->{Name}) eq 'service') {
+    my $name = lc($el->{Name});
+    if ($name eq 'container') {
+        ($self->{current}) 
+            || throw IOC::ConfigurationError "This should never happen";
+        $self->{current} = $self->{current}->getParentContainer() 
+            if $self->{current}->isa('IOC::Container') &&
+               !$self->{current}->isRootContainer();
+    }
+    elsif ($name eq 'service') {
         #print Dumper $self->{current_service};
         $self->_createService();    
     }
+
 }
 
 sub characters {
@@ -236,7 +260,13 @@ IOC::Config::XML::SAX::Handler - An XML::SAX handler to read IOC Config files
 
 =over 4
 
-=item B<>
+=item B<new>
+
+=item B<start_element>
+
+=item B<end_element>
+
+=item B<characters>
 
 =back
 
