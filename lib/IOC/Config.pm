@@ -258,7 +258,7 @@ IOC::Config->addServiceType(
             $name => (
                 $block->get( 'Class' ),
                 $constructor, [
-                    $block->get( 'Parameter' ),
+                    $class->ComponentParameter($block->get( 'Parameter' )),
                 ],
             ),
         );
