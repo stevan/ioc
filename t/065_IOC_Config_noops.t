@@ -12,7 +12,7 @@ use_ok( $CLASS );
 
 foreach my $test_number (1 .. 2) {
     my $filename = File::Spec->catfile(
-        't', 'confs', '65_IOC_Config_noops_' . sprintf("%02d", $test_number) . '.conf'
+        't', 'confs', '065_IOC_Config_noops_' . sprintf("%02d", $test_number) . '.conf'
     );
 
     my $object = IOC::Config->new();

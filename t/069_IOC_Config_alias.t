@@ -16,7 +16,7 @@ use_ok( 't::Classes' );
     isa_ok($config, 'IOC::Config');
     
     my $filename = File::Spec->catfile(
-        't', 'confs', '69_IOC_Config_alias.conf',
+        't', 'confs', '069_IOC_Config_alias.conf',
     );
 
     lives_ok {

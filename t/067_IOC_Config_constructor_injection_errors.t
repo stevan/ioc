@@ -14,7 +14,7 @@ use_ok( 't::Classes' );
 
 {
     my $filename = File::Spec->catfile(
-        't', 'confs', '67_IOC_Config_constructor_injection_errors_01.conf',
+        't', 'confs', '067_IOC_Config_constructor_injection_errors_01.conf',
     );
 
     my $object = IOC::Config->new();
@@ -30,7 +30,7 @@ use_ok( 't::Classes' );
 
 {
     my $filename = File::Spec->catfile(
-        't', 'confs', '67_IOC_Config_constructor_injection_errors_02.conf',
+        't', 'confs', '067_IOC_Config_constructor_injection_errors_02.conf',
     );
 
     my $object = IOC::Config->new();

@@ -12,7 +12,7 @@ use_ok( $CLASS );
 
 {
     my $filename = File::Spec->catfile(
-        't', 'confs', '71_IOC_Config_subclass_remove.conf',
+        't', 'confs', '071_IOC_Config_subclass_remove.conf',
     );
 
     my $object = IOC::Config->new();

@@ -17,7 +17,7 @@ BEGIN {
     isa_ok($config, 'IOC::Config');
     
     my $filename = File::Spec->catfile(
-        't', 'confs', '63_IOC_Config_container_recursion.conf'
+        't', 'confs', '063_IOC_Config_container_recursion.conf'
     );
 
     lives_ok {

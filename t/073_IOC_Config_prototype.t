@@ -17,7 +17,7 @@ BEGIN {
     isa_ok($config, 'IOC::Config');
     
     my $filename = File::Spec->catfile(
-        't', 'confs', '73_IOC_Config_prototype.conf',
+        't', 'confs', '073_IOC_Config_prototype.conf',
     );
 
     lives_ok {

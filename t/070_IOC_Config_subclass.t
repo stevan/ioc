@@ -16,7 +16,7 @@ BEGIN {
 }
 
 my $filename = File::Spec->catfile(
-    't', 'confs', '70_IOC_Config_subclass.conf',
+    't', 'confs', '070_IOC_Config_subclass.conf',
 );
 
 my $object = $CLASS->new;
