@@ -224,7 +224,7 @@ IOC::Config->addServiceType(
         my $sub = eval "sub { @sub_text };";
 
         (ref $sub eq 'CODE')
-            || throw IOC::InvalidArgument "BlockInjection subroutine did not compile";
+            || throw IOC::InvalidArgument "BlockInjection subroutine did not compile: $@";
 
         my $class = $is_singleton
             ? 'IOC::Service'
@@ -254,11 +254,25 @@ IOC::Config->addServiceType(
             ? 'IOC::Service::ConstructorInjection'
             : 'IOC::Service::Prototype::ConstructorInjection';
 
+        my @parameters = map {
+            if (/^\s*C\(\s*(.*?)\s*\)\s*$/) {
+                IOC::Service::ConstructorInjection->ComponentParameter( "$1" )
+            }
+            elsif ( /^\s*P\(\s*(.*?)\s*\)\s*$/ ) {
+                eval"$1"
+            } elsif ( /^\s*S\(\s*(.*?)\s*\)\s*$/ ) {
+                $1
+            }
+            else {
+                $_
+            }
+        } $block->get( 'Parameter' );
+
         return $class->new(
             $name => (
                 $block->get( 'Class' ),
                 $constructor, [
-                    $block->get( 'Parameter' ),
+                    @parameters,
                 ],
             ),
         );
@@ -515,12 +529,21 @@ This is the name of the constructor to use. This defaults to "new".
 This is a parameter value to be passed to the constructor. It may be either a
 literal value or the pathname of some component.
 
-Any legal IOC pathname can be given. The component does not have to be
-defined before (and may not be defined within the configuration file), but
-must be defined before the first time this SERVICE is requested.
-
 This parameter may be set multiple times. The values will be put in a list in
 the order that they are seen in the configuration file.
+
+The parameter will assume that it is a straight string unless it matches the
+following pattern(s):
+    
+=over 4
+
+=item C( /component/pathname )
+
+=item P( [ { "Perl" => 'datastructure' } ] )
+
+=item S( A string )
+
+=back
 
 =back
 
@@ -574,8 +597,10 @@ Examples
    Type ConstructorInjection
    Class Foo::Bar
    Constructor not_new
-   Parameter /some/component
+   Parameter "C( /some/component )"
    Parameter literal1
+   Parameter "S( literal1 )"
+   Parameter "P( [ 1, 2, { foo => 'bar' } ] )"
  </Service>
 
  <Service Foo>

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 13;
+use Test::More tests => 19;
 use Test::Exception;
 use File::Spec;
 
@@ -37,9 +37,21 @@ isa_ok( $s2, 'Foo' );
 is( $s2->getVal, 2, '... got the correct value' );
 
 my $s3 = $r->locateService( '/Cont1/Serv3' );
-isa_ok( $s3, 'Bar' );
-is( $s3->getVal, 'some_value', '... got the correct value' );
+isa_ok( $s3, 'Foo' );
+is( $s3->getVal, 2, '... got the correct value' );
 
 my $s4 = $r->locateService( '/Cont1/Serv4' );
 isa_ok( $s4, 'Foo' );
-is( $s4->getVal, 2, '... got the correct value' );
+is( $s4->getVal, 'some_value', '... got the correct value' );
+
+my $s5 = $r->locateService( '/Cont1/Serv5' );
+isa_ok( $s5, 'Foo' );
+is_deeply( $s5->getVal, [ 'val' ], '... got the correct value' );
+
+my $s6 = $r->locateService( '/Cont1/Serv6' );
+isa_ok( $s6, 'Bar' );
+is( $s6->getVal, 'some_value', '... got the correct value' );
+
+my $s7 = $r->locateService( '/Cont1/Serv7' );
+isa_ok( $s7, 'Foo' );
+is( $s7->getVal, 2, '... got the correct value' );
