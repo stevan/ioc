@@ -31,8 +31,12 @@ foreach my $test_number (1 .. 11) {
     my $object = IOC::Config->new();
     isa_ok( $object, 'IOC::Config' );
 
+    my $filename = File::Spec->catfile(
+        't', 'confs', '064_IOC_Config_errors_12.conf'
+    );
+
     throws_ok {
-        $object->read('t/confs/064_IOC_Config_errors_12.conf' );
+        $object->read($filename);
     } "IOC::InsufficientArguments", '... file failed to read (as expected)';
 
     my $r = IOC::Registry->new;
@@ -42,9 +46,13 @@ foreach my $test_number (1 .. 11) {
 {
     my $object = IOC::Config->new();
     isa_ok( $object, 'IOC::Config' );
+    
+    my $filename = File::Spec->catfile(
+        't', 'confs', '064_IOC_Config_errors_13.conf'
+    );    
 
     throws_ok {
-        $object->read('t/confs/064_IOC_Config_errors_13.conf' );
+        $object->read($filename);
     } "IOC::InvalidArgument", '... file failed to read (as expected)';
 
     my $r = IOC::Registry->new;
