@@ -22,6 +22,10 @@ can_ok("IOC::Config::XML", 'new');
 # real world test ...
 {
     {
+        package My::DBI;
+        
+        sub connect { bless {} }
+    
         package My::DB::Logger;
         
         sub new { bless {} }
@@ -50,11 +54,11 @@ can_ok("IOC::Config::XML", 'new');
     <Registry>
         <Container name='Application'>
             <Container name='Database'>      
-                <Service name='dsn'      type='Literal'>dbi:Mock:</Service>            
+                <Service name='dsn'      type='Literal'>dbi:NullP:</Service>            
                 <Service name='username' type='Literal'>user</Service>            
                 <Service name='password' type='Literal'><![CDATA[****]]></Service>                                    
                 <Service name='connection' type='ConstructorInjection'>
-                    <Class name='DBI' constructor='connect' />
+                    <Class name='My::DBI' constructor='connect' />
                     <Parameter type='component'>dsn</Parameter>                
                     <Parameter type='component'>username</Parameter>
                     <Parameter type='component'>password</Parameter>                            
@@ -119,12 +123,12 @@ can_ok("IOC::Config::XML", 'new');
         [ 'connection', 'dsn', 'password', 'username' ],
         '... got the right service list');
         
-    is($db->get('dsn'),      'dbi:Mock:', '... got the right value');
+    is($db->get('dsn'),      'dbi:NullP:', '... got the right value');
     is($db->get('username'), 'user',      '... got the right value');
     is($db->get('password'), '****',      '... got the right value');        
     
     my $dbh = $db->get('connection');
-    isa_ok($dbh, 'DBI::db');
+    isa_ok($dbh, 'My::DBI');
     
     is_deeply(
         [ sort $app->getServiceList() ], 
@@ -136,7 +140,7 @@ can_ok("IOC::Config::XML", 'new');
     my $logger = $app->get('logger');
     isa_ok($logger, 'My::DB::Logger');
     
-    isa_ok($logger->{dbi}, 'DBI::db');
+    isa_ok($logger->{dbi}, 'My::DBI');
     is($logger->{dbi}, $dbh, '... and it is the same database handle too');
     
     is($logger->{db_table_name}, 'tbl_log', '... got the right logger table');    

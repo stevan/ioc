@@ -1,5 +1,13 @@
 Revision history for Perl extension IOC.
 
+0.25 Sat Feb 26 2005
+    - fixed an accidentatel dependency created in 
+      the 060_IOC_Config_XML_test.t test file. It
+      was looking for DBI, and specificall DBD::Mock.
+      I removed this and created a dummy package in
+      the test file as a substitute. It should work
+      fine now.
+
 0.24 Mon Feb 21 2004
     * IOC::Service::ConstructorInjection
     * IOC::Service::SetterInjection  
