@@ -3,54 +3,42 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 6;
 use Test::Exception;
-
-my @tests;
-
-push @tests, [ <<X, 'IOC::InsufficientArguments' ];
-<Registry Foo>
-  <Container Bar>
-    <Service Baz>
-      Type SetterInjection
-    </Service>
-  </Container>
-</Registry>
-X
-
-push @tests, [ <<X, 'IOC::InvalidArgument' ];
-<Registry Foo>
-  <Container Bar>
-    <Service Baz>
-      Type SetterInjection
-      Class Foo
-      Unrecognized Parameter
-    </Service>
-  </Container>
-</Registry>
-X
-
-plan tests => 2 + 3 * @tests;
-
-use IO::Scalar;
+use File::Spec;
 
 my $CLASS = 'IOC::Config';
 use_ok( $CLASS );
 
 use_ok( 't::Classes' );
 
-foreach my $test (@tests) {
-    my ($config, $error) = @$test;
+{
+    my $filename = File::Spec->catfile(
+        't', 'confs', '68_IOC_Config_setter_injection_errors_01.conf',
+    );
 
-    my $fh = IO::Scalar->new( \$config );
-    isa_ok( $fh, 'IO::Scalar' );
-
-    my $object = $CLASS->new;
-    isa_ok( $object, $CLASS );
+    my $object = IOC::Config->new();
+    isa_ok( $object, 'IOC::Config' );
 
     throws_ok {
-        $object->read( $fh );
-    } $error, "File failed to read:\n$@";
+        $object->read( $filename );
+    } "IOC::InsufficientArguments", '... file failed to read (as expected)';
+
+    my $r = IOC::Registry->new;
+    $r->unregisterContainer('Bar') if $r->hasRegisteredContainer( 'Bar');
+}
+
+{
+    my $filename = File::Spec->catfile(
+        't', 'confs', '68_IOC_Config_setter_injection_errors_02.conf',
+    );
+
+    my $object = IOC::Config->new();
+    isa_ok( $object, 'IOC::Config' );
+
+    throws_ok {
+        $object->read( $filename );
+    } "IOC::InvalidArgument", '... file failed to read (as expected)';
 
     my $r = IOC::Registry->new;
     $r->unregisterContainer('Bar') if $r->hasRegisteredContainer( 'Bar');

@@ -3,22 +3,9 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 8;
 use Test::Exception;
-
-my $file = <<__END_FILE__;
-<Registry Foo>
-  <Container Bar>
-    <Service Baz>
-      Alias /blarg/Baz2
-      Type ConstructorInjection
-      Class Foo
-    </Service>
-  </Container>
-</Registry>
-__END_FILE__
-
-plan tests => 8;
+use File::Spec;
 
 my $CLASS = 'IOC::Config';
 use_ok( $CLASS );
@@ -28,10 +15,12 @@ use_ok( 't::Classes' );
     my $config = IOC::Config->new();
     isa_ok($config, 'IOC::Config');
     
-    open my $fh, '<:scalar', \$file;
+    my $filename = File::Spec->catfile(
+        't', 'confs', '69_IOC_Config_alias.conf',
+    );
 
     lives_ok {
-        $config->read( $fh );
+        $config->read( $filename );
     } '... read file correctly';
 }
 

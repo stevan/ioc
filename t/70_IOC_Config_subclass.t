@@ -5,18 +5,23 @@ use warnings;
 
 use Test::More tests => 13;
 use Test::Exception;
+use File::Spec;
 
+my $CLASS;
 BEGIN {
+    $CLASS = 't::SubClass';
     use_ok('IOC::Config');
-    use_ok('t::SubClass');    
+    use_ok($CLASS);    
     use_ok('t::Classes');
 }
 
-my $CLASS = 't::SubClass';
+my $filename = File::Spec->catfile(
+    't', 'confs', '70_IOC_Config_subclass.conf',
+);
 
 my $object = $CLASS->new;
 lives_ok {
-    $object->read('t/confs/70_IOC_Config_subclass.conf')
+    $object->read( $filename )
 } '... File read correctly';
 
 my $r = IOC::Registry->new;

@@ -74,6 +74,17 @@ t/confs/64_IOC_Config_errors_10.conf
 t/confs/64_IOC_Config_errors_11.conf
 t/confs/64_IOC_Config_errors_12.conf
 t/confs/64_IOC_Config_errors_13.conf
+t/confs/65_IOC_Config_noops_01.conf
+t/confs/65_IOC_Config_noops_02.conf
+t/confs/66_IOC_Config_block_injection_errors_01.conf
+t/confs/66_IOC_Config_block_injection_errors_02.conf
+t/confs/67_IOC_Config_constructor_injection_errors_01.conf
+t/confs/67_IOC_Config_constructor_injection_errors_02.conf
+t/confs/68_IOC_Config_setter_injection_errors_01.conf
+t/confs/68_IOC_Config_setter_injection_errors_02.conf
+t/confs/69_IOC_Config_alias.conf
 t/confs/70_IOC_Config_subclass.conf
+t/confs/71_IOC_Config_subclass_remove.conf
 t/confs/72_IOC_Config_subclass_child.conf
 t/confs/73_IOC_Config_prototype.conf
+

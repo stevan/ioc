@@ -5,6 +5,7 @@ use warnings;
 
 use Test::More tests => 9;
 use Test::Exception;
+use File::Spec;
 
 BEGIN {
     use_ok('IOC::Config');
@@ -15,8 +16,12 @@ BEGIN {
     my $config = IOC::Config->new();
     isa_ok($config, 'IOC::Config');
     
+    my $filename = File::Spec->catfile(
+        't', 'confs', '63_IOC_Config_container_recursion.conf'
+    );
+
     lives_ok {
-        $config->read('t/confs/63_IOC_Config_container_recursion.conf')
+        $config->read( $filename );
     } '... file read correctly';
 }
 

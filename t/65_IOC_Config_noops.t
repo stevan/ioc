@@ -3,34 +3,22 @@
 use strict;
 use warnings;
 
-use Test::More;
-
-my @tests = (
-    [
-        '',
-    ],
-    [
-        '<foo>
-        </foo>',
-    ],
-);
-
-plan tests => 1 + 3 * @tests;
-
-use IO::Scalar;
+use Test::More tests => 5;
+use Test::Exception;
+use File::Spec;
 
 my $CLASS = 'IOC::Config';
 use_ok( $CLASS );
 
-foreach my $test (@tests) {
-    my $fh = IO::Scalar->new( \$test->[0] );
-    isa_ok( $fh, 'IO::Scalar' );
+foreach my $test_number (1 .. 2) {
+    my $filename = File::Spec->catfile(
+        't', 'confs', '65_IOC_Config_noops_' . sprintf("%02d", $test_number) . '.conf'
+    );
 
-    my $object = $CLASS->new;
-    isa_ok( $object, $CLASS );
+    my $object = IOC::Config->new();
+    isa_ok( $object, 'IOC::Config' );
 
-    eval {
-        $object->read( $fh );
-    };
-    ok( !$@, 'File read successfully, if with no point' );
+    lives_ok {
+        $object->read( $filename );
+    } 'File read successfully, if with no point';
 }

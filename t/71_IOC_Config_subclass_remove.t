@@ -3,40 +3,24 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 3;
 use Test::Exception;
-
-my @tests;
-
-push @tests, [ <<X, 'IOC::InvalidArgument' ];
-<Registry Foo>
-  <Container Bar>
-    <Service Baz>
-      Type ConstructorInjection
-    </Service>
-  </Container>
-</Registry>
-X
-
-plan tests => 1 + 3 * @tests;
-
-use IO::Scalar;
+use File::Spec;
 
 my $CLASS = 't::SubClass';
 use_ok( $CLASS );
 
-foreach my $test (@tests) {
-    my ($config, $error) = @$test;
+{
+    my $filename = File::Spec->catfile(
+        't', 'confs', '71_IOC_Config_subclass_remove.conf',
+    );
 
-    my $fh = IO::Scalar->new( \$config );
-    isa_ok( $fh, 'IO::Scalar' );
-
-    my $object = $CLASS->new;
-    isa_ok( $object, $CLASS );
+    my $object = IOC::Config->new();
+    isa_ok( $object, 'IOC::Config' );
 
     throws_ok {
-        $object->read( $fh );
-    } $error, "File failed to read:\n$@";
+        $object->read( $filename );
+    } "IOC::InvalidArgument", '... file failed to read (as expected)';
 
     my $r = IOC::Registry->new;
     $r->unregisterContainer('Bar') if $r->hasRegisteredContainer( 'Bar');
