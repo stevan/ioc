@@ -13,9 +13,12 @@ use IOC::Registry;
 use IOC::Container;
 
 use IOC::Service;
+use IOC::Service::Prototype;
 use IOC::Service::Literal;
 use IOC::Service::ConstructorInjection;
+use IOC::Service::Prototype::ConstructorInjection;
 use IOC::Service::SetterInjection;
+use IOC::Service::Prototype::SetterInjection;
 
 my %ServiceTypes;
 
@@ -126,8 +129,16 @@ sub _read {
                 || throw IOC::InvalidArgument "$parm is not a legal option";
         }
 
+        my $is_singleton = ~~1;
+        if (defined( my $sing = $service->get( 'Singleton' ) )) {
+            $is_singleton = $sing;
+        }
+        elsif (defined( my $val = $service->get( 'Prototype' ) )) {
+            $is_singleton = $sing;
+        }
+
         $c->register(
-            $service_map->{subroutine}->( $name, $service ),
+            $service_map->{subroutine}->( $name, $service, $is_singleton ),
         );
 
         foreach my $alias ( $service->get( 'Alias' ) )
@@ -140,6 +151,10 @@ sub _read {
 sub getConfig {
     (shift)->{_config}
 }
+
+my @standard_options = qw(
+    type alias singleton prototype
+);
 
 sub addServiceType {
     my $class = shift;
@@ -158,7 +173,7 @@ sub addServiceType {
     ((!exists $options{optional}) || (ref $options{optional} eq 'ARRAY'))
         || throw IOC::InsufficientArguments;
     $options{optional} ||= [];
-    @{$options{optional}} = map { lc } @{$options{optional}}, 'type', 'alias';
+    @{$options{optional}} = map { lc } @{$options{optional}}, @standard_options;
 
     ((exists $options{subroutine}) && (ref $options{subroutine} eq 'CODE'))
         || throw IOC::InsufficientArguments;
@@ -203,7 +218,7 @@ IOC::Config->addServiceType(
     optional => [qw(
     )],
     subroutine => sub {
-        my ($name, $block) = @_;
+        my ($name, $block, $is_singleton) = @_;
 
         my @sub_text = $block->get( 'Subroutine' );
         my $sub = eval "sub { @sub_text };";
@@ -211,7 +226,11 @@ IOC::Config->addServiceType(
         (ref $sub eq 'CODE')
             || throw IOC::InvalidArgument "BlockInjection subroutine did not compile";
 
-        return IOC::Service->new(
+        my $class = $is_singleton
+            ? 'IOC::Service'
+            : 'IOC::Service::Prototype';
+
+        return $class->new(
             $name => $sub,
         );
     },
@@ -226,12 +245,16 @@ IOC::Config->addServiceType(
         Constructor Parameter
     )],
     subroutine => sub {
-        my ($name, $block) = @_;
+        my ($name, $block, $is_singleton) = @_;
 
         my $constructor = $block->get( 'Constructor' )
             || 'new';
 
-        return IOC::Service::ConstructorInjection->new(
+        my $class = $is_singleton
+            ? 'IOC::Service::ConstructorInjection'
+            : 'IOC::Service::Prototype::ConstructorInjection';
+
+        return $class->new(
             $name => (
                 $block->get( 'Class' ),
                 $constructor, [
@@ -251,12 +274,16 @@ IOC::Config->addServiceType(
         Constructor Setter
     )],
     subroutine => sub {
-        my ($name, $block) = @_;
+        my ($name, $block, $is_singleton) = @_;
 
         my $constructor = $block->get( 'Constructor' )
             || 'new';
 
-        return IOC::Service::SetterInjection->new(
+        my $class = $is_singleton
+            ? 'IOC::Service::SetterInjection'
+            : 'IOC::Service::Prototype::SetterInjection';
+
+        return $class->new(
             $name => (
                 $block->get( 'Class' ),
                 $constructor, [
@@ -326,8 +353,25 @@ service type.
 =item * subroutine
 
 If this service type is found, this subroutine will be called. It will be passed
-the name of the block and the block object from Config::ApacheFormat. You are
-expected to return an L<IOC::Service> object.
+the following positional parameters:
+
+=over 4
+
+=item 1
+
+This is the name of the block.
+
+=item 2
+
+The block object from Config::ApacheFormat.
+
+=item 3
+
+A boolean as to whether a singleton is expected or not.
+
+=back
+
+You expected to return an L<IOC::Service> object.
 
 =back
 
@@ -598,7 +642,7 @@ You then create a subclass as so
        Option3 Option4
    )],
    subroutine => sub {
-       my ($name, $block) = @_;
+       my ($name, $block, $is_singleton) = @_;
 
        my $value = $block->get( 'Option1' );
 
