@@ -9,6 +9,7 @@ WriteMakefile(
         'Scalar::Util'      => 1.10,
         'Class::Throwable'       => 0.04,
         'Class::Interfaces'      => 0.01,
-        'Class::StrongSingleton' => 0.01
+        'Class::StrongSingleton' => 0.01,
+        'Config::ApacheFormat'   => 1.2
     }
 );

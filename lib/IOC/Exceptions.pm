@@ -4,7 +4,7 @@ package IOC::Exceptions;
 use strict;
 use warnings;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use Class::Throwable qw(
         IOC::NotFound
@@ -20,6 +20,8 @@ use Class::Throwable qw(
         IOC::ConstructorNotFound
         IOC::MethodNotFound
         IOC::OperationFailed
+        IOC::InvalidArgument
+        IOC::InitializationError
         );
 
 $Class::Throwable::DEFAULT_VERBOSITY = 2;
