@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+use Test::More tests => 6;
 use Test::Exception;
 
 BEGIN {
@@ -29,8 +29,5 @@ BEGIN {
     
     is($test->name(), 'test', '... got the right name');
 
-    SKIP: {
-        skip('need XML::SAX for these to work', 1);
-        is_deeply([ $test->getServiceList() ], [ 'test' ], '... got the right service name list');
-    }
+#    is_deeply([ $test->getServiceList() ], [ 'test' ], '... got the right service name list');
 }

@@ -153,9 +153,6 @@ sub start_element {
                 $c = IOC::Container->new($self->_getName($el));                
                 $self->{current}->addSubContainer($c);
             }
-            else {
-                throw IOC::ConfigurationError "Containers only allowed within Registry and other Containers";                    
-            }
             $self->{current} = $c;
         }
         elsif ($type eq 'service') {

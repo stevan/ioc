@@ -10,6 +10,7 @@ lib/IOC/Proxy.pm
 lib/IOC/Registry.pm
 lib/IOC/Service.pm
 lib/IOC/Config/XML.pm
+lib/IOC/Config/XML/SAX/Handler.pm
 lib/IOC/Container/MethodResolution.pm
 lib/IOC/Proxy/Interfaces.pm
 lib/IOC/Service/ConstructorInjection.pm

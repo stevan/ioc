@@ -1,5 +1,19 @@
 Revision history for Perl extension IOC.
 
+0.26 Thurs Mar 31 2005
+    ~ removed XML::Simple dependency
+    - added XML::SAX dependency    
+
+    * IOC::Config::XML
+        - changed this to use the XML::SAX module
+          and the IOC::Config::XML::SAX::Handler
+          instead of XML::Simple
+
+    + Added IOC::Config::XML::SAX::Handler
+        - adapted tests from IOC::Config::XML 
+          (not many changes actually most things
+          stayed the same)
+
 0.25 Sat Feb 26 2005
     - fixed an accidentatel dependency created in 
       the 060_IOC_Config_XML_test.t test file. It
