@@ -1,6 +1,6 @@
 Revision history for Perl extension IOC.
 
-0.23 
+0.23 Fri Jan 14 2005
     * IOC::Registry
         - added aliasService() method so that you
           can alias one service path for another
