@@ -4,46 +4,29 @@ use strict;
 use warnings;
 
 use Test::More tests => 8;
+use Test::Exception;
 
-my $CLASS = 'IOC::Config';
-use_ok( $CLASS );
+BEGIN {
+    use_ok('IOC::Config');
+    use_ok('t::Classes');    
+}
 
-use_ok( 't::Classes' );
-
-my $object = $CLASS->new;
-ok( $object->read( \*DATA ), 'File read correctly' );
+{
+    my $config = IOC::Config->new();
+    isa_ok($config, 'IOC::Config');
+    
+    lives_ok {
+        $config->read('t/confs/63_IOC_Config_container_recursion.conf')
+    } '... file read correctly';
+}
 
 my $r = IOC::Registry->new;
 isa_ok( $r, 'IOC::Registry' );
 
 my $s1 = $r->locateService( '/Cont1/Serv1' );
 isa_ok( $s1, 'Foo' );
-is( $s1->getVal, undef );
+is( $s1->getVal, undef, '... got the expected value' );
 
 my $s2 = $r->locateService( '/Cont1/SubCont1/Serv1' );
 isa_ok( $s1, 'Foo' );
-is( $s1->getVal, undef );
-
-__DATA__
-<Registry IOC>
-  <Container Cont1>
-    Literal Literal1 some_value
-    <Service Serv1>
-      Type ConstructorInjection
-      Class Foo
-    </Service>
-    <Container SubCont1>
-      <Service Serv1>
-        Type ConstructorInjection
-        Class Foo
-      </Service>
-      <Container SubCont2>
-        Literal Literal1 some_other_value
-        <Service Serv1>
-          Type ConstructorInjection
-          Class Foo
-        </Service>
-      </Container>
-    </Container>
-  </Container>
-</Registry>
+is( $s1->getVal, undef, '... got the expected value' );
