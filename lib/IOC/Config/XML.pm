@@ -122,7 +122,8 @@ sub _parseConstructorInjectionService {
             IOC::Service::ConstructorInjection->ComponentParameter($_->{content})
         }
         elsif ($_->{type} eq 'perl') {
-            my $value = eval $_->{content};
+            my $perl = (exists ${$_}{CDATA}) ? $_->{CDATA} : $_->{content};
+            my $value = eval $perl;
             throw IOC::OperationFailed "Could not compile '" . $_->{content}. "'", $@ if $@;
             $value;
         }
