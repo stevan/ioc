@@ -1,6 +1,6 @@
 Revision history for Perl extension IOC.
 
-0.24
+0.24 Mon Feb 21 2004
     * IOC::Service::ConstructorInjection
     * IOC::Service::SetterInjection  
         - improved the handling for loading 
@@ -14,7 +14,6 @@ Revision history for Perl extension IOC.
         - added some expecptions for IOC::Config::XML
             ~ IOC::ConfigurationError
             
-
 0.23 Fri Jan 14 2005
     * IOC::Registry
         - added aliasService() method so that you

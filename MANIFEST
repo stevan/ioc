@@ -42,5 +42,9 @@ t/051_IOC_Proxy_edge_case_test.t
 t/055_IOC_Proxy_Interfaces_test.t
 t/060_IOC_Config_XML_test.t
 t/061_IOC_Config_XML_edge_tests.t
+t/062_IOC_Config_XML_error_test.t
+t/063_IOC_Config_XML_include_test.t
 t/pod.t
 t/pod_coverage.t
+t/confs/063a_IOC_Config_XML_include_test.xml
+t/confs/063b_IOC_Config_XML_include_test.xml

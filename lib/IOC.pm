@@ -141,6 +141,16 @@ This IOC::Proxy subclass which proxies an object, but only implements a specifie
 
 =back
 
+=head2 Configuration Classes
+
+=over
+
+=item L<IOC::Config::XML>
+
+This module allows you to configure an IOC::Registry object using XML.
+
+=back
+
 =head2 Container Classes
 
 Containers classes can hold references to both IOC::Service objects as well as other IOC::Containers. Containers are central to the framework as they provide the means of managing, storing and retrieving IOC::Service objects. 
@@ -294,26 +304,27 @@ I use B<Devel::Cover> to test the code coverage of my tests, below is the B<Deve
  --------------------------------------------- ------ ------ ------ ------ ------ ------ ------
  File                                            stmt branch   cond    sub    pod   time  total
  --------------------------------------------- ------ ------ ------ ------ ------ ------ ------
- IOC.pm                                         100.0    n/a    n/a  100.0    n/a    2.3  100.0
- IOC/Exceptions.pm                              100.0    n/a    n/a  100.0    n/a   22.2  100.0
- IOC/Interfaces.pm                              100.0    n/a    n/a  100.0    n/a    6.9  100.0
- IOC/Registry.pm                                100.0   97.6   66.7  100.0  100.0    7.1   97.4
- IOC/Proxy.pm                                   100.0   92.3   60.0  100.0  100.0    5.9   97.4
- IOC/Proxy/Interfaces.pm                        100.0  100.0    n/a  100.0    n/a    0.9  100.0
- IOC/Container.pm                               100.0   98.3   91.3  100.0  100.0   25.4   98.9
- IOC/Container/MethodResolution.pm              100.0  100.0    n/a  100.0    n/a    0.7  100.0
- IOC/Service.pm                                  89.4   78.6   66.7   88.5  100.0   13.5   85.7
- IOC/Service/ConstructorInjection.pm            100.0  100.0   75.0  100.0  100.0    2.1   96.6
- IOC/Service/SetterInjection.pm                 100.0  100.0   77.8  100.0  100.0    5.9   97.4
- IOC/Service/Literal.pm                         100.0  100.0   33.3  100.0  100.0    0.7   96.2
- IOC/Service/Prototype.pm                       100.0  100.0    n/a  100.0  100.0    0.8  100.0
- IOC/Service/Prototype/ConstructorInjection.pm  100.0    n/a    n/a  100.0    n/a    0.4  100.0
- IOC/Service/Prototype/SetterInjection.pm       100.0    n/a    n/a  100.0    n/a    0.4  100.0
- IOC/Visitor/SearchForContainer.pm              100.0  100.0   66.7  100.0  100.0    0.8   96.6
- IOC/Visitor/SearchForService.pm                100.0  100.0   66.7  100.0  100.0    0.9   96.8
- IOC/Visitor/ServiceLocator.pm                  100.0  100.0   66.7  100.0  100.0    2.5   97.3
+ IOC.pm                                         100.0    n/a    n/a  100.0    n/a    1.4  100.0
+ IOC/Exceptions.pm                              100.0    n/a    n/a  100.0    n/a   18.0  100.0
+ IOC/Interfaces.pm                              100.0    n/a    n/a  100.0    n/a    2.5  100.0
+ IOC/Registry.pm                                100.0   97.6   66.7  100.0  100.0    6.3   97.4
+ IOC/Config/XML.pm                              100.0  100.0   85.2  100.0  100.0   24.4   98.3
+ IOC/Proxy.pm                                   100.0   92.3   60.0  100.0  100.0    3.1   97.4
+ IOC/Proxy/Interfaces.pm                        100.0  100.0    n/a  100.0    n/a    0.5  100.0
+ IOC/Container.pm                               100.0   98.3   91.3  100.0  100.0   22.6   98.9
+ IOC/Container/MethodResolution.pm              100.0  100.0    n/a  100.0    n/a    0.4  100.0
+ IOC/Service.pm                                  89.4   78.6   66.7   88.5  100.0    6.9   85.7
+ IOC/Service/Literal.pm                          96.7   50.0   33.3   90.9  100.0    5.8   88.5
+ IOC/Service/ConstructorInjection.pm            100.0  100.0   66.7  100.0  100.0    2.1   93.9
+ IOC/Service/SetterInjection.pm                 100.0  100.0   66.7  100.0  100.0    1.9   94.3
+ IOC/Service/Prototype.pm                       100.0  100.0    n/a  100.0  100.0    0.5  100.0
+ IOC/Service/Prototype/ConstructorInjection.pm  100.0    n/a    n/a  100.0    n/a    0.3  100.0
+ IOC/Service/Prototype/SetterInjection.pm       100.0    n/a    n/a  100.0    n/a    0.3  100.0
+ IOC/Visitor/SearchForContainer.pm              100.0  100.0   66.7  100.0  100.0    0.6   96.6
+ IOC/Visitor/SearchForService.pm                100.0  100.0   66.7  100.0  100.0    0.6   96.8
+ IOC/Visitor/ServiceLocator.pm                  100.0  100.0   66.7  100.0  100.0    1.9   97.3
  --------------------------------------------- ------ ------ ------ ------ ------ ------ ------
- Total                                           98.9   95.7   73.2   98.5  100.0  100.0   96.6
+ Total                                           99.0   95.8   73.5   98.2  100.0  100.0   96.3
  --------------------------------------------- ------ ------ ------ ------ ------ ------ ------
 
 =head1 SEE ALSO

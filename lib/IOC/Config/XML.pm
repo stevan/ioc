@@ -245,41 +245,45 @@ IOC::Config::XML - An XML Config reader for IOC
 
 =head1 DESCRIPTION
 
+This is the first version of an XML configuration module for IOC. Currently this uses L<XML::Simple>, which is a great module, but not really the best fit for this. I am planning on porting this over to use L<XML::SAX> in the very near future (once I finish my current project, which utilizes this). 
+
+I consider this module to be late-BETA quality (it better be, it will be in production in about a month). As I said I plan on porting it to L<XML::SAX>, but that will in no way change the XML format itself. Since it uses XML::Simple, which in turn uses XML::Parser or XML::SAX whichever is available, the tests here will occasionally emit (mostly harmless) warnings, which will eventually be removed when XML::Simple is removed.
+
 =head1 SAMPLE XML CONF
 
-    <Registry>
-        <Container name='Application'>
-            <Container name='Database'>      
-                <Service name='dsn'      type='Literal'>dbi:Mock:</Service>            
-                <Service name='username' type='Literal'>user</Service>            
-                <Service name='password' type='Literal'>****</Service>                                    
-                <Service name='connection' type='ConstructorInjection' prototype='true'>
-                    <Class name='DBI' constructor='connect' />
-                    <Parameter type='component'>dsn</Parameter>                
-                    <Parameter type='component'>username</Parameter>
-                    <Parameter type='component'>password</Parameter>                            
-                </Service>
-            </Container>     
-            <Service name='logger_table' type='Literal'>tbl_log</Service>               
-            <Service name='logger' type='SetterInjection'>
-                <Class name='My::DB::Logger' constructor='new' />
-                <Setter name='setDBIConnection'>/Database/connection</Setter>
-                <Setter name='setDBTableName'>logger_table</Setter>            
-            </Service> 
-            <Service name='template_factory' type='ConstructorInjection'>
-                <Class name='My::Template::Factory' constructor='new' />
-                <Parameter type='perl'>[ path => 'test' ]</Parameter>                          
-            </Service> 
-            <Service name='app'>
-                <CDATA>
+    E<lt>RegistryE<gt>
+        E<lt>Container name='Application'E<gt>
+            E<lt>Container name='Database'E<gt>      
+                E<lt>Service name='dsn'      type='Literal'E<gt>dbi:Mock:E<lt>/ServiceE<gt>            
+                E<lt>Service name='username' type='Literal'E<gt>userE<lt>/ServiceE<gt>            
+                E<lt>Service name='password' type='Literal'E<gt>****E<lt>/ServiceE<gt>                                    
+                E<lt>Service name='connection' type='ConstructorInjection' prototype='true'E<gt>
+                    E<lt>Class name='DBI' constructor='connect' /E<gt>
+                    E<lt>Parameter type='component'E<gt>dsnE<lt>/ParameterE<gt>                
+                    E<lt>Parameter type='component'E<gt>usernameE<lt>/ParameterE<gt>
+                    E<lt>Parameter type='component'E<gt>passwordE<lt>/ParameterE<gt>                            
+                E<lt>/ServiceE<gt>
+            E<lt>/ContainerE<gt>     
+            E<lt>Service name='logger_table' type='Literal'E<gt>tbl_logE<lt>/ServiceE<gt>               
+            E<lt>Service name='logger' type='SetterInjection'E<gt>
+                E<lt>Class name='My::DB::Logger' constructor='new' /E<gt>
+                E<lt>Setter name='setDBIConnection'E<gt>/Database/connectionE<lt>/SetterE<gt>
+                E<lt>Setter name='setDBTableName'E<gt>logger_tableE<lt>/SetterE<gt>            
+            E<lt>/ServiceE<gt> 
+            E<lt>Service name='template_factory' type='ConstructorInjection'E<gt>
+                E<lt>Class name='My::Template::Factory' constructor='new' /E<gt>
+                E<lt>Parameter type='perl'E<gt>[ path =E<gt> 'test' ]E<lt>/ParameterE<gt>                          
+            E<lt>/ServiceE<gt> 
+            E<lt>Service name='app'E<gt>
+                E<lt>![CDATA[
                     my $c = shift;
-                    my $app = My::Application->new();
-                    $app->setLogger($c->get('logger'));
+                    my $app = My::Application-E<gt>new();
+                    $app-E<gt>setLogger($c-E<gt>get('logger'));
                     return $app;
-                </CDATA>
-            </Service>           
-        </Container>
-    </Registry>
+                ]]E<gt>
+            E<lt>/ServiceE<gt>           
+        E<lt>/ContainerE<gt>
+    E<lt>/RegistryE<gt>
 
 =head1 METHODS
 
@@ -287,7 +291,11 @@ IOC::Config::XML - An XML Config reader for IOC
 
 =item B<new>
 
+Create a new XML::Config::XML object to read a configuration and intialize the L<IOC::Registry>.
+
 =item B<read ($source)>
+
+Given an XML C<$source> file or string, this will read the XML in it and intialize the L<IOC::Registry> singleton.
 
 =back
 
@@ -295,11 +303,17 @@ IOC::Config::XML - An XML Config reader for IOC
 
 =over 4
 
+=item Convert this from XML::Simple to XML::SAX
+
+This is my first prority, however I do not currently have enough time to do it, and XML::Simple is solid and working fine for now.
+
 =item Handle Includes
+
+This will be implemented when I move to XML::SAX.
 
 =item Handle Aliasing
 
-=item Convert this from XML::Simple to XML::SAX of some kind
+This is a minor feature of IOC::Registry, but I want to support it in here eventually. It shouldn't be a problem really, just don't currently have a need to get it in place.
 
 =back
 
