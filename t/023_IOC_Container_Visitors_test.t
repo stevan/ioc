@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 49;
+use Test::More tests => 53;
 use Test::Exception;
 
 BEGIN { 
@@ -79,6 +79,26 @@ $container->register(
     ok(defined($service), '... we got a service');
     is($service, 'Test The Test Service : Test Service', '... got our expected service');
 }  
+
+$test->getSubContainer('test_find')->addSubContainer(
+    IOC::Container->new('test_test_find')
+                  ->register(
+                    IOC::Service->new('test_test_find_service' => sub { "Test Find Service : " . (shift)->find('../../test_service') } )
+                    )
+    );
+
+{
+    my $visitor = IOC::Visitor::ServiceLocator->new("/test/test_find/test_test_find/test_test_find_service");
+    isa_ok($visitor, 'IOC::Visitor::ServiceLocator');
+        
+    my $service;    
+    lives_ok {
+            $service = $container->accept($visitor);
+    } '... it worked';
+    
+    ok(defined($service), '... we got a service');
+    is($service, 'Test Find Service : Test Service', '... got our expected service');
+}
 
 # check for find errors
 

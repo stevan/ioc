@@ -19,57 +19,7 @@ can_ok("IOC::Config::XML", 'new');
     can_ok($conf, 'read');  
 }
 
-{
-    my $sample_config = q|
-    <Registry>
-        <Container name='test'>
-            <Service name='test_service'>
-            <CDATA>
-                return bless({}, 'My::Test');
-            </CDATA>
-            </Service>
-        </Container>  
-        <Container name='test2'>
-            <Service name='test_service2'>
-            <CDATA>
-                return bless({}, 'My::Test2');
-            </CDATA>
-            </Service>
-        </Container>      
-    </Registry>
-    |;
-
-    my $conf = IOC::Config::XML->new();
-    isa_ok($conf, 'IOC::Config::XML');
-    
-    lives_ok {
-        $conf->read($sample_config);
-    } '... we read the conf okay';
-
-    my $reg = IOC::Registry->new();
-    isa_ok($reg, 'IOC::Registry');
-    
-    {
-        my $c = $reg->getRegisteredContainer('test');
-        isa_ok($c, 'IOC::Container');
-        
-        is($c->name(), 'test', '... got the right name');
-        
-        isa_ok($c->get('test_service'), 'My::Test');
-    }
-    
-    {
-        my $c = $reg->getRegisteredContainer('test2');
-        isa_ok($c, 'IOC::Container');
-        
-        is($c->name(), 'test2', '... got the right name');
-        
-        isa_ok($c->get('test_service2'), 'My::Test2');
-    }    
-    
-    $reg->DESTROY();
-}
-
+# real world test ...
 {
     {
         package My::DB::Logger;
@@ -93,11 +43,7 @@ can_ok("IOC::Config::XML", 'new');
         }
         
         package My::Template::Factory;
-        
-        sub new { 
-            shift;
-            bless { path => shift };
-        }
+        sub new { bless { array => $_[1], hash  => $_[2], string => $_[3] } }
     }
 
     my $sample_config = q|
@@ -106,7 +52,7 @@ can_ok("IOC::Config::XML", 'new');
             <Container name='Database'>      
                 <Service name='dsn'      type='Literal'>dbi:Mock:</Service>            
                 <Service name='username' type='Literal'>user</Service>            
-                <Service name='password' type='Literal'>****</Service>                                    
+                <Service name='password' type='Literal'><![CDATA[****]]></Service>                                    
                 <Service name='connection' type='ConstructorInjection'>
                     <Class name='DBI' constructor='connect' />
                     <Parameter type='component'>dsn</Parameter>                
@@ -117,20 +63,22 @@ can_ok("IOC::Config::XML", 'new');
             <Service name='logger_table' type='Literal'>tbl_log</Service>               
             <Service name='logger' type='SetterInjection'>
                 <Class name='My::DB::Logger' constructor='new' />
-                <Setter name='setDBIConnection'>/Database/connection</Setter>
+                <Setter name='setDBIConnection'><![CDATA[/Database/connection]]></Setter>
                 <Setter name='setDBTableName'>logger_table</Setter>            
             </Service>  
             <Service name='template_factory' type='ConstructorInjection'>
                 <Class name='My::Template::Factory' constructor='new' />
-                <Parameter type='perl'>[ path => 'test' ]</Parameter>                          
+                <Parameter type='perl'>[ 1, 2, 3 ]</Parameter>  
+                <Parameter type='perl'><![CDATA[{ path => 'test' }]]></Parameter>    
+                <Parameter><![CDATA[Testing CDATA here]]></Parameter>                                                          
             </Service>             
             <Service name='app'>
-                <CDATA>
+                <![CDATA[
                     my $c = shift;
                     my $app = My::Application->new();
                     $app->setLogger($c->get('logger'));
                     return $app;
-                </CDATA>
+                ]]>
             </Service>                        
         </Container>
     </Registry>
@@ -170,6 +118,10 @@ can_ok("IOC::Config::XML", 'new');
         [ sort $db->getServiceList() ],
         [ 'connection', 'dsn', 'password', 'username' ],
         '... got the right service list');
+        
+    is($db->get('dsn'),      'dbi:Mock:', '... got the right value');
+    is($db->get('username'), 'user',      '... got the right value');
+    is($db->get('password'), '****',      '... got the right value');        
     
     my $dbh = $db->get('connection');
     isa_ok($dbh, 'DBI::db');
@@ -200,26 +152,34 @@ can_ok("IOC::Config::XML", 'new');
     isa_ok($template_factory, 'My::Template::Factory');
     
     is_deeply(
-        $template_factory->{path},
-        [ path => 'test' ],
+        $template_factory->{array},
+        [ 1, 2, 3 ],
         '... got the right array value');
+        
+    is_deeply(
+        $template_factory->{hash},
+        { path => 'test' },
+        '... got the right hash value');     
+        
+    is($template_factory->{string}, 'Testing CDATA here', '... got the right string value');
     
     $reg->DESTROY();
 }
 
+# testing prototypes
 {
     my $sample_config = q|
     <Registry>
         <Container name='test'>
             <Service name='test_service' prototype='false'>
-            <CDATA>
+            <![CDATA[
                 return bless({}, 'My::Test');
-            </CDATA>
+            ]]>
             </Service>
             <Service name='test_service2' prototype='true'>
-            <CDATA>
+            <![CDATA[
                 return bless({}, 'My::Test2');
-            </CDATA>
+            ]]>
             </Service>
         </Container>      
     </Registry>

@@ -4,7 +4,7 @@ package IOC::Config::XML;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use IOC::Exceptions;
 
@@ -41,39 +41,60 @@ sub read {
     (defined($source) && $source) 
         || throw IOC::InsufficientArguments "You must provide something to read";
     $self->{_config} = XML::Simple::XMLin($source => (
-                keyattr    => { Service => '+name' }, 
-                forcearray => [ 'Service', 'Container', 'Parameter', 'Setter' ]
+                forcearray    => [ 'Service', 'Container', 'Parameter', 'Setter' ],
+                keyattr       => { 
+                                    Service   => '+name',
+                                    Container => '+name',
+                                    Setter    => '+name'                                                                        
+                                 }, 
+                forcecontent  => 1,
+                keeproot      => 1,
+                suppressempty => 1
             ));
     my $reg = IOC::Registry->new();
     $self->_parse($reg);
 }
 
+## private methods
+
 sub _parse {
     my ($self, $reg) = @_;
     my $conf = $self->{_config};
-    (!exists $conf->{Service}) 
-        || throw IOC::InitializationError "You cannot have a service in a registry";
+    # if we have nothing we do nothing
+    return unless keys %{$conf};
+    # but if we have something, the Registry must exist
+    (exists $conf->{Registry}) 
+        || throw IOC::ConfigurationError "Your root element must be a <Registry> tag";    
+    (!exists $conf->{Registry}->{Service}) 
+        || throw IOC::ConfigurationError "You cannot have a service in a registry";
         
-#     print Dumper $conf->{Container};        
+#     print Dumper $conf->{Registry};  
+    
+    (ref($conf->{Registry}->{Container}) ne 'ARRAY')
+        || throw IOC::ConfigurationError "Bad Config, Container missing a 'name' value";                
       
-    foreach my $container_conf (@{$conf->{Container}}) {
-        my $container = $self->_parseContainer($container_conf);
+    foreach my $container_key (keys %{$conf->{Registry}->{Container}}) {
+        my $container = $self->_parseContainer($conf->{Registry}->{Container}->{$container_key});
         $reg->registerContainer($container);      
     }
 }
 
 sub _parseContainer {
     my ($self, $conf) = @_;  
-    
-    (exists $conf->{name}) 
-        || throw IOC::ConfigurationError "Container must have 'name' value";      
+
+    # this can never be reached
+#     (exists $conf->{name}) 
+#         || throw IOC::ConfigurationError "Container must have 'name' value";      
     
     my $container = IOC::Container->new($conf->{name});      
+    return $container unless exists $conf->{Service};
+
+#         print Dumper $conf;
+
+    (ref($conf->{Service}) ne 'ARRAY')
+        || throw IOC::ConfigurationError "Bad Config, Service missing a 'name' value";
     
-    my @service_keys = keys %{$conf->{Service}};
-    
-    foreach my $service_key (@service_keys) {
-        next if $service_key eq 'name';  
+    foreach my $service_key (keys %{$conf->{Service}}) {
 
 #         print Dumper $conf->{Service};
 #         print Dumper $conf->{Service}->{$service_key};
@@ -84,8 +105,8 @@ sub _parseContainer {
     
     # if we have sub-containers, then recurse
     if (exists $conf->{Container}) {
-        foreach my $container_conf (@{$conf->{Container}}) {
-            my $sub_container = $self->_parseContainer($container_conf);
+        foreach my $container_key (keys %{$conf->{Container}}) {
+            my $sub_container = $self->_parseContainer($conf->{Container}->{$container_key});
             $container->addSubContainer($sub_container);      
         }    
     }
@@ -98,8 +119,10 @@ sub _parseService {
     
 #     print Dumper $conf; 
 
-    (exists $conf->{name}) 
-        || throw IOC::ConfigurationError "Service must have 'name' value";
+    # apparently this can never be reached
+    # because of how we deal with Services
+#     (exists $conf->{name}) 
+#         || throw IOC::ConfigurationError "Service must have 'name' value";
        
     unless (exists $conf->{type}) {
         my $service_class;
@@ -108,10 +131,10 @@ sub _parseService {
         }
         else {
             $service_class = 'IOC::Service';
-        }         
-        (exists $conf->{CDATA}) 
-            || throw IOC::ConfigurationError "IOC::Service must have a CDATA section";
-        my $sub = eval "sub {" . $conf->{CDATA} . "}";
+        }       
+        (exists $conf->{content}) 
+            || throw IOC::ConfigurationError "IOC::Service '" . $conf->{name} . "' must have a CDATA section";
+        my $sub = eval "sub {" . $conf->{content} . "}";
         (!$@ || ref($sub) eq 'CODE') 
             || throw IOC::OperationFailed "Could not compile sub for (" . $conf->{name} . ")"=> $@;
         return $service_class->new($conf->{name} => $sub);
@@ -120,18 +143,17 @@ sub _parseService {
         my $type = $conf->{type};
         my $method = $self->can('_parse' . $type . 'Service');
         (defined($method) && ref($method) eq 'CODE')
-            || throw IOC::InitializationError "We have no parser for type '$type'";
+            || throw IOC::ConfigurationError "We have no parser for Service type '$type' named '" . $conf->{name} . "'";
         return $self->$method($conf);
     }
 }
 
 sub _parseLiteralService {
     my ($self, $conf) = @_;  
-    (exists $conf->{CDATA} || exists $conf->{content}) 
-        || throw IOC::ConfigurationError "IOC::Service::Literal must have either a content value or CDATA";    
-    return IOC::Service::Literal->new($conf->{name} => (
-        (exists $conf->{CDATA}) ? $conf->{CDATA} : $conf->{content}
-    ));    
+#     print Dumper $conf;     
+    (exists $conf->{content}) 
+        || throw IOC::ConfigurationError "IOC::Service::Literal '" . $conf->{name} . "' must have CDATA";    
+    return IOC::Service::Literal->new($conf->{name} => $conf->{content});    
 }
 
 sub _parseConstructorInjectionService {
@@ -143,28 +165,35 @@ sub _parseConstructorInjectionService {
     else {
         $service_class = 'IOC::Service::ConstructorInjection';
     }
+#     print Dumper $conf;    
     my @parameters = map {
-        if ($_->{type} eq 'component') {
-            $service_class->ComponentParameter($_->{content})
-        }
-        elsif ($_->{type} eq 'perl') {
-            my $perl = (exists $_->{CDATA}) ? $_->{CDATA} : $_->{content};
-            my $value = eval $perl;
-            throw IOC::OperationFailed "Could not compile '" . $_->{content}. "'", $@ if $@;
-            $value;
+        if (exists $_->{type}) {
+            if ($_->{type} eq 'component') {
+                $service_class->ComponentParameter($_->{content});
+            }
+            elsif ($_->{type} eq 'perl') {
+                my $perl = $_->{content};
+                my $value = eval $perl;
+                throw IOC::OperationFailed "Could not compile '$perl' for '" . $conf->{name} . "'", $@ if $@;
+                $value;
+            }
+            else {
+                throw IOC::ConfigurationError "I do not understand the 'type' parameter '" . $_->{type} . "' in Service named '" . $conf->{name} . "'";
+            }
         }
         else {
-            (exists $_->{CDATA}) ? $_->{CDATA} : $_->{content}
+            (exists $_->{content})
+                || throw IOC::ConfigurationError "The <Parameter> must have content or a CDATA section in Service named  '" . $conf->{name} . "'";
+            $_->{content};
         }
     } @{$conf->{Parameter}};
     (exists $conf->{Class})
-        || throw IOC::ConfigurationError "$service_class must have a <Class> tag";
+        || throw IOC::ConfigurationError "$service_class '" . $conf->{name} . "' must have a <Class> tag";
     my $class = $conf->{Class};
     (exists $class->{name} && exists $class->{constructor}) 
-        || throw IOC::ConfigurationError "$service_class <Class> tag must have a 'name' and a 'constructor' value";
+        || throw IOC::ConfigurationError "$service_class '" . $conf->{name} . "' <Class> tag must have a 'name' and a 'constructor' value";
     return $service_class->new($conf->{name} => (
-        $conf->{Class}->{name}, $conf->{Class}->{constructor},
-        \@parameters
+        $class->{name}, $class->{constructor}, \@parameters
     ));    
 }
 
@@ -177,15 +206,23 @@ sub _parseSetterInjectionService {
     else {
         $service_class = 'IOC::Service::SetterInjection';
     }    
+    my $setters = $conf->{Setter};
     my @setters = map { 
-        { $_->{name} => $_->{content} }
-    } @{$conf->{Setter}};
+        { 
+            $setters->{$_}->{name} => $setters->{$_}->{content}
+        }
+    } keys %{$setters};
 
 #     print Dumper $conf;
 #     print Dumper \@setters;    
-    
+
+    (exists $conf->{Class})
+        || throw IOC::ConfigurationError "$service_class '" . $conf->{name} . "' must have a <Class> tag";
+    my $class = $conf->{Class};
+    (exists $class->{name} && exists $class->{constructor}) 
+        || throw IOC::ConfigurationError "$service_class '" . $conf->{name} . "' <Class> tag must have a 'name' and a 'constructor' value";    
     return $service_class->new($conf->{name} => (
-        $conf->{Class}->{name}, $conf->{Class}->{constructor}, \@setters
+        $class->{name}, $class->{constructor}, \@setters
     ));    
 }
 
@@ -200,6 +237,11 @@ IOC::Config::XML - An XML Config reader for IOC
 =head1 SYNOPSIS
 
   use IOC::Config::XML;
+  
+  my $conf_reader = IOC::Config::XML->new();
+  $conf_reader->read('my_ioc_conf.xml');
+  
+  # now the IOC::Registry singleton is all configured
 
 =head1 DESCRIPTION
 
@@ -257,7 +299,7 @@ IOC::Config::XML - An XML Config reader for IOC
 
 =item Handle Aliasing
 
-=item better error checking and handling
+=item Convert this from XML::Simple to XML::SAX of some kind
 
 =back
 
