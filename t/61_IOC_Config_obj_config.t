@@ -37,6 +37,6 @@ while ( my ($opt,$val) = each %options ) {
         is_deeply( $config->$opt, $val, "'$opt' is correctly set." );
     }
     else {
-        is( $config->$opt, $val, "'$opt' set correctly to '$val'" );
+        is( $config->$opt, $val, "'$opt' correctly set." );
     }
 }

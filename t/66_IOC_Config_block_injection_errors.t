@@ -18,7 +18,7 @@ push @tests, [ <<X, 'IOC::InsufficientArguments' ];
 </Registry>
 X
 
-push @tests, [ <<X, 'IOC::InsufficientArguments' ];
+push @tests, [ <<X, 'IOC::InvalidArgument' ];
 <Registry Foo>
   <Container Bar>
     <Service Baz>
@@ -30,9 +30,7 @@ push @tests, [ <<X, 'IOC::InsufficientArguments' ];
 </Registry>
 X
 
-plan tests => 2 + 3 * @tests;
-
-use IO::Scalar;
+plan tests => 2 + 2 * @tests;
 
 my $CLASS = 'IOC::Config';
 use_ok( $CLASS );
@@ -42,8 +40,7 @@ use_ok( 't::Classes' );
 foreach my $test (@tests) {
     my ($config, $error) = @$test;
 
-    my $fh = IO::Scalar->new( \$config );
-    isa_ok( $fh, 'IO::Scalar' );
+    open my $fh, "<:scalar", \$config;
 
     my $object = $CLASS->new;
     isa_ok( $object, $CLASS );

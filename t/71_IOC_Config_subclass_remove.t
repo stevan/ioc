@@ -8,7 +8,7 @@ use Test::Exception;
 
 my @tests;
 
-push @tests, [ <<X, 'IOC::InsufficientArguments' ];
+push @tests, [ <<X, 'IOC::InvalidArgument' ];
 <Registry Foo>
   <Container Bar>
     <Service Baz>
