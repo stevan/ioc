@@ -4,7 +4,7 @@ package IOC;
 use strict;
 use warnings;
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 use IOC::Exceptions;
 
@@ -282,10 +282,6 @@ These are things which I have in the back of my head and would someday like to c
 =item Dependency Analyzer
 
 I would like to create some kind of Visitor object which would traverse a IOC::Container hierarchy and analyze the dependencies in it. This is somewhat simple for the ::ConstructorInjection and ::SetterInjection Services since they store the keys to their dependencies inside the object. However it is more complex with regular IOC::Service objects which utilize the Block Injection pseudo-type. For those the initialization block would need to probably be run through L<B::Deparse> and the dependency code parsed out.
-
-=item XML/YAML Configuration
-
-I do not think it would be all that hard to create a means of reading in dependency configuration from an XML or YAML document. If anyone is interested in doing this one, please contact me and we can discuss some ideas about it.
 
 =item Dependency Visualization
 

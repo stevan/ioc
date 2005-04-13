@@ -1,5 +1,13 @@
 Revision history for Perl extension IOC.
 
+0.27 Wed Apr 13 2005
+    * IOC::Config::XML
+        - added some more documentation    
+        
+    * IOC::Config::SAX::Handler
+        - code refactor (no functional changes)
+        - added some more documentation
+
 0.26 Thurs Mar 31 2005
     ~ removed XML::Simple dependency
     - added XML::SAX dependency    

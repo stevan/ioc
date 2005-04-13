@@ -26,6 +26,8 @@ This module requires these other modules and libraries:
     Class::Throwable
     Class::StrongSingleton
     
+    XML::SAX (for IOC::Config::XML)
+    
     Test::Exception (for testing)
 
 COPYRIGHT AND LICENCE

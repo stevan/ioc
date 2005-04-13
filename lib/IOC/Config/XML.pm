@@ -10,7 +10,6 @@ use IOC::Exceptions;
 use IOC::Config::XML::SAX::Handler;
 
 use XML::SAX::ParserFactory;
-use Data::Dumper;
 
 sub new {
     my ($_class) = @_;
@@ -55,9 +54,7 @@ IOC::Config::XML - An XML Config reader for IOC
 
 =head1 DESCRIPTION
 
-This is the first version of an XML configuration module for IOC. Currently this uses L<XML::Simple>, which is a great module, but not really the best fit for this. I am planning on porting this over to use L<XML::SAX> in the very near future (once I finish my current project, which utilizes this). 
-
-I consider this module to be late-BETA quality (it better be, it will be in production in about a month). As I said I plan on porting it to L<XML::SAX>, but that will in no way change the XML format itself. Since it uses XML::Simple, which in turn uses XML::Parser or XML::SAX whichever is available, the tests here will occasionally emit (mostly harmless) warnings, which will eventually be removed when XML::Simple is removed.
+This is the second version of an XML configuration module for IOC. The first version used L<XML::Simple>, which is a great module, but not really the best fit for this. I have now ported this over to use L<XML::SAX>, which is much more flexible solution (not to mention a really nice way to interact with XML). I consider this module to be late-BETA quality (it is currently in production and working without issue for a month now).
 
 =head1 SAMPLE XML CONF
 
@@ -115,11 +112,15 @@ Given an XML C<$source> file or string, this will read the XML in it and intiali
 
 =item Handle Includes
 
-I thought this will be implemented when I move to XML::SAX, but it didn't. 
+I thought this will be implemented when I moved to XML::SAX, but it didn't. I am thinking I will try to handle this on my own instead of trying to use XML tricks
 
 =item Handle Aliasing
 
 This is a minor feature of IOC::Registry, but I want to support it in here eventually. It shouldn't be a problem really, just don't currently have a need to get it in place.
+
+=item Handle IOC::Proxy objects
+
+It would be nice if you could configure IOC::Proxy objects through XML as well.
 
 =back
 
@@ -134,6 +135,8 @@ I use B<Devel::Cover> to test the code coverage of my tests, see the CODE COVERA
 =head1 SEE ALSO
 
 =over 4
+
+=item L<XML::SAX>
 
 =item L<XML::SAX::ParserFactory>
 
