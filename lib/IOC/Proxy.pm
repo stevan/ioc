@@ -4,7 +4,7 @@ package IOC::Proxy;
 use strict;
 use warnings;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use Scalar::Util qw(blessed);
 
@@ -114,7 +114,7 @@ sub _installMethods {
                                 $self->onMethodCall($method_name, $method->{full_name}, []);                            
                             }
                             else {
-                                $self->onMethodCall($method_name, $method->{full_name}, \@_);
+                                $self->onMethodCall($method_name, $method->{full_name}, [ @_ ]);
                             }
                             $a =~ s/\:\:\_\:\:Proxy//;
                             ${"${obj_class}::AUTOLOAD"} = $a;
@@ -133,7 +133,7 @@ sub _installMethods {
         }        
         else {
             *{"${proxy_package}::$method_name"} = sub { 
-                            $self->onMethodCall($method_name, $method->{full_name}, \@_);
+                            $self->onMethodCall($method_name, $method->{full_name}, [ @_ ]);
                             goto &{$method->{code}};
                         };
         }

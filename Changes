@@ -1,5 +1,10 @@
 Revision history for Perl extension IOC.
 
+0.28 Wed May 4 2005
+    * IOC::Proxy
+    * IOC::Proxy::Interfaces    
+        - fixed a bug with newer perls and @_
+
 0.27 Wed Apr 13 2005
     * IOC::Config::XML
         - added some more documentation    

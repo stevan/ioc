@@ -4,7 +4,7 @@ package IOC::Proxy::Interfaces;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use base 'IOC::Proxy';
 
@@ -42,7 +42,7 @@ sub _installMethods {
     while (my ($method_name, $method) = each %{$methods}) {     
         if (exists ${$interface_methods}{$method_name}) {
             *{"${proxy_package}::$method_name"} = sub { 
-                            $self->onMethodCall($method_name, $method->{full_name}, \@_);
+                            $self->onMethodCall($method_name, $method->{full_name}, [ @_ ]);
                             goto &{$method->{code}};
                         };
         }
