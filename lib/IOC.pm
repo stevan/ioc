@@ -4,7 +4,7 @@ package IOC;
 use strict;
 use warnings;
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 use IOC::Exceptions;
 
@@ -410,7 +410,7 @@ stevan little, E<lt>stevan@iinteractive.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2004 by Infinity Interactive, Inc.
+Copyright 2004-2007 by Infinity Interactive, Inc.
 
 L<http://www.iinteractive.com>
 

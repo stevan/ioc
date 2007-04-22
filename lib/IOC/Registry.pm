@@ -4,7 +4,7 @@ package IOC::Registry;
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Scalar::Util qw(blessed);
 
@@ -92,7 +92,7 @@ sub aliasService {
 # locate Service by path
 
 sub locateService {
-    my ($self, $path) = @_;
+    my ($self, $path, @extra_args) = @_;
     (defined($path)) || throw IOC::InsufficientArguments "You must supply a path to a service";
     # if the service has been aliased, get the real path ...
     $path = $self->{service_aliases}->{$path} if exists ${$self->{service_aliases}}{$path};
@@ -103,7 +103,7 @@ sub locateService {
         || throw IOC::ContainerNotFound "There is no registered container found at '$registered_container_name' for the path '${path}'"; 
     my $service;
     eval {
-        $service = $self->{containers}->{$registered_container_name}->find(join "/" => @path);
+        $service = $self->{containers}->{$registered_container_name}->find((join "/" => @path), \@extra_args);
     };
     throw IOC::ServiceNotFound "There is no service found at the path '${path}'" => $@ if $@;    
     return $service;
@@ -302,7 +302,7 @@ stevan little, E<lt>stevan@iinteractive.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2004 by Infinity Interactive, Inc.
+Copyright 2004-2007 by Infinity Interactive, Inc.
 
 L<http://www.iinteractive.com>
 

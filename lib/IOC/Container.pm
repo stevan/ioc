@@ -4,7 +4,7 @@ package IOC::Container;
 use strict;
 use warnings;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Scalar::Util qw(blessed);
 
@@ -189,9 +189,10 @@ sub get {
 }
 
 sub find {
-    my ($self, $path) = @_;
-    (defined($path)) || throw IOC::InsufficientArguments "You must provide a path of find a service";
-    return $self->accept(IOC::Visitor::ServiceLocator->new($path));    
+    my ($self, $path, $extra_args) = @_;
+    (defined($path)) 
+        || throw IOC::InsufficientArguments "You must provide a path of find a service";
+    return $self->accept(IOC::Visitor::ServiceLocator->new($path, $extra_args));    
 }
 
 sub hasService {
@@ -473,7 +474,7 @@ stevan little, E<lt>stevan@iinteractive.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2004 by Infinity Interactive, Inc.
+Copyright 2004-2007 by Infinity Interactive, Inc.
 
 L<http://www.iinteractive.com>
 

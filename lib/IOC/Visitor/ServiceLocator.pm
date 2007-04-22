@@ -4,7 +4,7 @@ package IOC::Visitor::ServiceLocator;
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.02';
 
 use Scalar::Util qw(blessed);
 
@@ -14,13 +14,14 @@ use IOC::Exceptions;
 use base 'IOC::Visitor';
 
 sub new {
-    my ($_class, $path) = @_;
+    my ($_class, $path, $extra_args) = @_;
     ($path) 
         || throw IOC::InsufficientArguments "You must provide an path to locate a container";
     my $class = ref($_class) || $_class;
     my $visitor = {
-        path => $path
-        };
+        path => $path,
+        extra_args => $extra_args
+    };
     bless($visitor, $class);
     return $visitor;
 }
@@ -30,6 +31,7 @@ sub visit {
     (blessed($container) && $container->isa('IOC::Container'))
         || throw IOC::InsufficientArguments "You must provide an IOC::Container object as a sub-container";
     my $service;
+    my @extra_args = (defined $self->{extra_args} ? @{$self->{extra_args}} : ());
     my @path = grep { $_ } split /\// => $self->{path};
     my $service_name = pop @path;
     if ($self->{path} =~ /^\//) {
@@ -41,7 +43,7 @@ sub visit {
             };
             throw IOC::UnableToLocateService "Could not locate the service at path '" . $self->{path} . "' failed at '$container_name'", $@ if $@;
         }
-        $service = $current->get($service_name);
+        $service = $current->get($service_name, @extra_args);
     }
     else {
         my $current = $container;
@@ -56,7 +58,7 @@ sub visit {
                 throw IOC::UnableToLocateService "Could not locate the service at path '" . $self->{path} . "' failed at '$container_name'", $@ if $@;                
             }
         }
-        $service = $current->get($service_name);         
+        $service = $current->get($service_name, @extra_args);         
     }
     return $service;
 }
@@ -138,7 +140,7 @@ stevan little, E<lt>stevan@iinteractive.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2004 by Infinity Interactive, Inc.
+Copyright 2004-2007 by Infinity Interactive, Inc.
 
 L<http://www.iinteractive.com>
 
