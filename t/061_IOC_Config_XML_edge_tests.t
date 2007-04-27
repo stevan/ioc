@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 34;
+use Test::More tests => 39;
 use Test::Exception;
 
 BEGIN {
@@ -219,4 +219,41 @@ BEGIN {
     
     $reg->DESTROY();
 }
+
+# test Setter injection without a setter
+{
+
+    my $sample_config = q|
+    <Registry>
+        <Container name='test'>
+            <Service type="Parameterized" name='test_service'>
+                <![CDATA[          
+                    my (undef, %params) = @_;
+                    return \%params;
+                ]]>                
+            </Service>           
+        </Container>      
+    </Registry>
+    |;
+
+    my $conf = IOC::Config::XML->new();
+    isa_ok($conf, 'IOC::Config::XML');
+    
+    lives_ok {
+        $conf->read($sample_config);
+    } '... we read the conf okay';
+
+    my $reg = IOC::Registry->new();
+    isa_ok($reg, 'IOC::Registry');
+
+    my $c = $reg->getRegisteredContainer('test');
+    isa_ok($c, 'IOC::Container');
+    
+    my $test_service = $c->get('test_service', (foo => 1, bar => 2));
+    is_deeply($test_service, {foo => 1, bar => 2}, '... got the right service');
+    
+    $reg->DESTROY();
+}
+
+
 

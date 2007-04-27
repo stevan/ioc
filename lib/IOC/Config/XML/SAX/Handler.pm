@@ -233,6 +233,18 @@ sub __makeService {
     );    
 }
 
+sub __makeServiceParameterized {
+    my ($self, $service_desc) = @_;
+    # we have a plain Service
+    ($service_desc->{data})
+        || throw IOC::ConfigurationError "No sub in Service";        
+    $self->{current}->register(
+        IOC::Service::Parameterized->new(
+            $service_desc->{name} => $self->_compilePerl('sub { ' . $service_desc->{data} . ' }')
+        )
+    );    
+}
+
 sub __makeServiceLiteral {
     my ($self, $service_desc) = @_;    
     (exists $service_desc->{data}) 

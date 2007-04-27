@@ -40,6 +40,16 @@ IOC::Service::Parameterized - An IOC Service object which accepts a set of param
 This is just like IOC::Service::Prototype, expect that it will accepts a set of key/value parameters 
 to the C<instance> method. It is used to support IOC::Service::Parameterized.
 
+          +--------------+
+          | IOC::Service |
+          +--------------+
+                 |
+                 ^
+                 |
+  +-----------------------------+
+  | IOC::Service::Parameterized |
+  +-----------------------------+
+
 =head1 CAVEAT
 
 It does not make any sense to have ConstructorInjection or SetterInjection subclasses of this, so 
