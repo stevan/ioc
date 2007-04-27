@@ -15,6 +15,7 @@ lib/IOC/Container/MethodResolution.pm
 lib/IOC/Proxy/Interfaces.pm
 lib/IOC/Service/ConstructorInjection.pm
 lib/IOC/Service/Literal.pm
+lib/IOC/Service/Parameterized.pm
 lib/IOC/Service/Prototype.pm
 lib/IOC/Service/SetterInjection.pm
 lib/IOC/Service/Prototype/ConstructorInjection.pm
@@ -22,6 +23,7 @@ lib/IOC/Service/Prototype/SetterInjection.pm
 lib/IOC/Visitor/SearchForContainer.pm
 lib/IOC/Visitor/SearchForService.pm
 lib/IOC/Visitor/ServiceLocator.pm
+lib/Test/IOC.pm
 t/010_IOC_test.t
 t/020_IOC_Container_test.t
 t/021_IOC_Container_MethodResolution_test.t
@@ -45,6 +47,9 @@ t/060_IOC_Config_XML_test.t
 t/061_IOC_Config_XML_edge_tests.t
 t/062_IOC_Config_XML_error_test.t
 t/063_IOC_Config_XML_include_test.t
+t/070_IOC_Parameterized.t
+t/071_IOC_Parameterized_w_Registry.t
+t/100_Test_IOC.t
 t/pod.t
 t/pod_coverage.t
 t/confs/063a_IOC_Config_XML_include_test.xml
