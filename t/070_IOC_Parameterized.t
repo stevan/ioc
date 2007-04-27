@@ -7,7 +7,7 @@ use Test::More tests => 11;
 use Test::Exception;
 
 BEGIN {    
-    use_ok('IOC::Container::Parameterized');
+    use_ok('IOC');
     use_ok('IOC::Service::Parameterized');   
 }
 
@@ -30,7 +30,7 @@ my $s = IOC::Service::Parameterized->new('localized_obj' => sub {
     Localized::Object->new($params{locale});
 });
 
-my $c = IOC::Container::Parameterized->new();
+my $c = IOC::Container->new();
 
 lives_ok {
     $c->register($s)

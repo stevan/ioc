@@ -21,13 +21,6 @@ sub instance {
     return $self->{block}->($self->{container}, %params);
 }
 
-sub setContainer {
-    my ($self, $container) = @_;
-    (blessed($container) && $container->isa('IOC::Container::Parameterized'))
-        || throw IOC::InsufficientArguments "container argument is incorrect";
-    $self->SUPER::setContainer($container);
-}
-
 sub deferred {
     throw IOC::IllegalOperation "Parameterized services cannot be deferred";
 }

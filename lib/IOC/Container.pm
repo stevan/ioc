@@ -167,7 +167,7 @@ sub addProxy {
 }
 
 sub get {
-    my ($self, $name) = @_;
+    my ($self, $name, %params) = @_;
     (defined($name)) || throw IOC::InsufficientArguments "You must provide a name of the service";
     (exists ${$self->{services}}{$name}) 
         || throw IOC::ServiceNotFound "Unknown Service '${name}'";
@@ -177,10 +177,16 @@ sub get {
     return $self->{services}->{$name}->instance() 
         if $self->{services}->{$name}->isa('IOC::Service::Literal');
     if ($self->_isServiceLocked($name)) {
+        # NOTE:
+        # if the service is parameterized
+        # then we cannot defer it - SL
+        ($self->{services}->{$name}->isa('IOC::Service::Parameterized')) 
+            && throw IOC::IllegalOperation "The service '$name' is locked, cannot defer a parameterized instance";
+        # otherwise ...    
         return $self->{services}->{$name}->deferred();
     }
     $self->_lockService($name);   
-    my $instance = $self->{services}->{$name}->instance();
+    my $instance = $self->{services}->{$name}->instance(%params);
     $self->_unlockService($name);      
     if (blessed($instance) && ref($instance) !~ /\:\:\_\:\:Proxy$/) {
         return $self->{proxies}->{$name}->wrap($instance) if exists ${$self->{proxies}}{$name};

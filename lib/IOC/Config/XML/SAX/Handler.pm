@@ -17,6 +17,7 @@ use IOC::Service::SetterInjection;
 use IOC::Service::Prototype;
 use IOC::Service::Prototype::ConstructorInjection;
 use IOC::Service::Prototype::SetterInjection;
+use IOC::Service::Parameterized;
 
 use base qw(XML::SAX::Base);
 
