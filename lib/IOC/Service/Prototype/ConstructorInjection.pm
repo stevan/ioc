@@ -49,6 +49,17 @@ This class essentially can be used just like IOC::Service::ConsturctorInjection,
          | IOC::Service::Prototype::ConstructorInjection |
          +-----------------------------------------------+
 
+=head1 METHODS
+
+=over
+
+=item B<instance()>
+
+Return a new instance of the component each time.
+Method inherited from L<IOC::Service::Prototype::SetterInjection>.
+
+=back
+
 =head1 TO DO
 
 =over 4

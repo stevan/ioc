@@ -95,7 +95,7 @@ sub _getValue {
 sub _compilePerl {
     my ($self, $perl) = @_;
     my $value = eval $perl;
-    throw IOC::OperationFailed "Could not compile '$perl'", $@ if $@;
+    throw IOC::OperationFailed "Could not compile '$perl': $@", $@ if $@;
     return $value;     
 }
 
@@ -190,13 +190,13 @@ sub _createSetterParameter {
 sub _handleServiceCharacterData {
     my ($self, $data) = @_;
     if ($self->{current_service}->{parameters}) {
-        $self->{current_service}->{parameters}->[-1]->{data} = $data;
+        $self->{current_service}->{parameters}->[-1]->{data} .= $data;
     }
     if ($self->{current_service}->{setters}) {
-        $self->{current_service}->{setters}->[-1]->{data} = $data;                
+        $self->{current_service}->{setters}->[-1]->{data} .= $data;                
     }
     else {
-        $self->{current_service}->{data} = $data;
+        $self->{current_service}->{data} .= $data;
     }    
 }
 
