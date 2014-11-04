@@ -95,7 +95,7 @@ sub _getValue {
 sub _compilePerl {
     my ($self, $perl) = @_;
     my $value = eval $perl;
-    throw IOC::OperationFailed "Could not compile '$perl'", $@ if $@;
+    throw IOC::OperationFailed "Could not compile '$perl': $@", $@ if $@;
     return $value;     
 }
 
