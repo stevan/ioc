@@ -190,13 +190,13 @@ sub _createSetterParameter {
 sub _handleServiceCharacterData {
     my ($self, $data) = @_;
     if ($self->{current_service}->{parameters}) {
-        $self->{current_service}->{parameters}->[-1]->{data} = $data;
+        $self->{current_service}->{parameters}->[-1]->{data} .= $data;
     }
     if ($self->{current_service}->{setters}) {
-        $self->{current_service}->{setters}->[-1]->{data} = $data;                
+        $self->{current_service}->{setters}->[-1]->{data} .= $data;                
     }
     else {
-        $self->{current_service}->{data} = $data;
+        $self->{current_service}->{data} .= $data;
     }    
 }
 
